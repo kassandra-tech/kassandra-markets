@@ -35,6 +35,6 @@ export class MarketsController {
     type: [ExchangeMarkets],
   })
   async getExchangeMarkets(@Query('exchanges') exchanges): Promise<ExchangeMarkets[]> {
-    return await this.marketsService.getExchangeMarket(exchanges);
+    return await this.marketsService.getExchangeMarkets(exchanges);
   }
 }

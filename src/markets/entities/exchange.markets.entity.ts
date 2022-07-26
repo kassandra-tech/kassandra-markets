@@ -5,7 +5,7 @@ import { ExchangeMarket } from './exchange.market.entity';
  * Record that contains the name of the exchange with associated exchange markets.
  */
 export class ExchangeMarkets {
-      /**
+    /**
      * Exchange hosting the market.
      * @example Binance
      */
