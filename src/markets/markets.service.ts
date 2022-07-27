@@ -39,12 +39,12 @@ export class MarketsService extends Data {
         var markets: ExchangeMarkets;
 
         if (exchange === Exchanges.Binance) {
-          markets = await this.binance.getMarkets();  
-          
+          markets = await this.binance.getMarkets();
+
           exchangeMarkets.push(markets);
         } else if (exchange === Exchanges.Coinbase) {
           markets = await this.coinbase.getMarkets();
-            
+
           exchangeMarkets.push(markets);
         }
       }

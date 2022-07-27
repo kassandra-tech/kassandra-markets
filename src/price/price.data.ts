@@ -40,28 +40,28 @@ export class PriceData {
         }
     }
 
-        /**
+    /**
      * Save the current prices for all updated markets for the provided exchange.
      * @param exchange 
      */
-         public async getCurrentPriceRecord(exchange: Exchanges): Promise<MarketPrices> {
-            try {
-                var prices: MarketPrice[] = [];
-                var MarketObj = Moralis.Object.extend(Definitions.PriceString);
-                var query = new Moralis.Query(MarketObj);
-                query.equalTo(Definitions.exchangeString, exchange);
-    
-                var result = await query.first();
-    
-                if (result !== undefined) {
-                    prices = result.get(Definitions.pricesString);
+    public async getCurrentPriceRecord(exchange: Exchanges): Promise<MarketPrices> {
+        try {
+            var prices: MarketPrice[] = [];
+            var MarketObj = Moralis.Object.extend(Definitions.PriceString);
+            var query = new Moralis.Query(MarketObj);
+            query.equalTo(Definitions.exchangeString, exchange);
 
-                    return new MarketPrices(exchange, prices);
-                }
-                
+            var result = await query.first();
+
+            if (result !== undefined) {
+                prices = result.get(Definitions.pricesString);
+
                 return new MarketPrices(exchange, prices);
-            } catch (error) {
-                console.log(error);
             }
+
+            return new MarketPrices(exchange, prices);
+        } catch (error) {
+            console.log(error);
         }
+    }
 }

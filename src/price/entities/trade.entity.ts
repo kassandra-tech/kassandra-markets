@@ -1,7 +1,7 @@
 /**
  * Record that contains the name of the exchange with associated exchange markets.
  */
- export class Trade {
+export class Trade {
     /**
      * Price for the trade.
      * @example 0.00001250 

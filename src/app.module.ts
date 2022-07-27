@@ -9,4 +9,4 @@ import { PriceModule } from './price/price.module';
 /**
  * Provides access to API routes and services.
  */
-export class AppModule {}
+export class AppModule { }

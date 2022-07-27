@@ -10,15 +10,15 @@ export class MarketPrices {
      * Exchange hosting the market.
      * @example Binance
      */
-     exchange: Exchanges;
+    exchange: Exchanges;
 
-     /**
-      * Markets supported by the exchange.
-      */
-     prices: MarketPrice[];
- 
-     public constructor(exchange: Exchanges, prices: MarketPrice[]) {
-         this.exchange = exchange;
-         this.prices = prices;
-     }
+    /**
+     * Markets supported by the exchange.
+     */
+    prices: MarketPrice[];
+
+    public constructor(exchange: Exchanges, prices: MarketPrice[]) {
+        this.exchange = exchange;
+        this.prices = prices;
+    }
 }

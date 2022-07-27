@@ -24,17 +24,17 @@ export class PriceService extends Data {
   public async getCurrentMarketPrices(exchanges: Exchanges[]): Promise<MarketPrices[]> {
     var exchangePrices: MarketPrices[] = [];
     var exchangeList: Exchanges[] = this.getExchanges(exchanges);
-    
+
     try {
       // Check to see if the database already has an ExchangeMarket for the requested market(s).
       for (const exchange of exchangeList) {
         var prices: MarketPrices;
 
         if (exchange === Exchanges.Binance) {
-          prices = await this.price.getCurrentPriceRecord(exchange);         
+          prices = await this.price.getCurrentPriceRecord(exchange);
           exchangePrices.push(prices);
         } else if (exchange === Exchanges.Coinbase) {
-          prices = await this.price.getCurrentPriceRecord(exchange);        
+          prices = await this.price.getCurrentPriceRecord(exchange);
           exchangePrices.push(prices);
         }
       }

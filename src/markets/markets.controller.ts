@@ -14,7 +14,7 @@ import { Exchanges } from '../enums/exchanges.enum';
 @ApiTags('markets')
 @Controller('markets')
 export class MarketsController {
-  constructor(private readonly marketsService: MarketsService) {}
+  constructor(private readonly marketsService: MarketsService) { }
 
   /**
    * Get supported markets for the requested exchange(s).

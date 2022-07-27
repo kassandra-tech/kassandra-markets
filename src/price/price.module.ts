@@ -10,4 +10,4 @@ import { PriceService } from './price.service';
 /**
  * Market routing and service details to request market information.
  */
-export class PriceModule {}
+export class PriceModule { }

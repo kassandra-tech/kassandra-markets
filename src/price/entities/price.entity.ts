@@ -3,7 +3,7 @@ import { Trade } from "./trade.entity";
 /**
  * Record that contains the name of the exchange with associated exchange markets.
  */
- export class Price {
+export class Price {
 
     market: string;
 

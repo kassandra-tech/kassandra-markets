@@ -12,15 +12,15 @@ export class Data {
 
         if (exchanges.includes(Exchanges.All)) {
             exchangeList = this.getAllExchanges();
-          } else if (Array.isArray(exchanges)) {
+        } else if (Array.isArray(exchanges)) {
             Array.from(exchanges).forEach(exchange => {
-              exchangeList.push(exchange);
+                exchangeList.push(exchange);
             })
-          } else {
+        } else {
             exchangeList.push(exchanges);
-          }
+        }
 
-          return exchangeList;
+        return exchangeList;
     }
 
     /**

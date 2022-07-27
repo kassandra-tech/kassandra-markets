@@ -10,7 +10,7 @@ const BinanceInterface = require('binance-api-node');
 const binance = BinanceInterface.default({
     apiKey: process.env.BINANCE_API_KEY,
     apiSecret: process.env.BINANCE_API_SECRET
-  });
+});
 
 /**
  * Provides access to Binance data.
@@ -43,7 +43,7 @@ export class Binance {
                 const exchangeInfo = await binance.exchangeInfo();
 
                 var markets = exchangeInfo.symbols;
-                Array.from(markets).forEach(function(binanceMarket: BinanceMarket) {
+                Array.from(markets).forEach(function (binanceMarket: BinanceMarket) {
                     this.exchangeMarkets.push(new ExchangeMarket(binanceMarket.symbol, binanceMarket.baseAsset, binanceMarket.quoteAsset));
                 });
 
@@ -65,13 +65,13 @@ export class Binance {
             var market = this.exchangeMarkets.find(market => market.format === trade.symbol);
 
             var currentPrice: MarketPrice;
-            if (currentPrice = this.currentPrices.find(record => record.market  === market.market)) {
+            if (currentPrice = this.currentPrices.find(record => record.market === market.market)) {
                 currentPrice.update(trade);
             } else {
                 currentPrice = new MarketPrice(market.market, trade);
                 this.currentPrices.push(currentPrice);
             }
-            
+
             if (Date.now() > updateTime + 500) {
                 updateTime = Date.now();
                 this.price.saveCurrentPriceRecord(this.name, this.currentPrices);

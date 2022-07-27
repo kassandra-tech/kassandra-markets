@@ -33,7 +33,7 @@ export class Coinbase {
             } else {
                 const markets = await coinbase.rest.product.getProducts();
 
-                Array.from(markets).forEach(function(coinbaseMarket: CoinbaseMarket) {
+                Array.from(markets).forEach(function (coinbaseMarket: CoinbaseMarket) {
                     exchangeMarkets.push(new ExchangeMarket(coinbaseMarket.display_name, coinbaseMarket.base_currency, coinbaseMarket.quote_currency));
                 });
 
