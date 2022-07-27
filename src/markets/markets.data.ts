@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataDefinitions } from '../data/DataDefinitions';
 import { ExchangeMarkets } from './entities/exchange.markets.entity';
-import { Exchanges } from './enums/exchanges.enum';
+import { Exchanges } from '../enums/exchanges.enum';
 
 const Moralis = require("moralis/node");
 const Definitions = new DataDefinitions();
@@ -17,18 +17,23 @@ export class MarketsData {
    * @returns ExchangeMarkets record with all supported markets.
    */
   public async getExchangeMarketsRecord(exchange: Exchanges): Promise<ExchangeMarkets> {
-    var moralisObj = Moralis.Object.extend(Definitions.ExchangeMarketString);
-    var query = new Moralis.Query(moralisObj);
-    query.descending(Definitions.createdAtString);
-    query.equalTo(Definitions.exchangeString, exchange);
+    try {
+      var moralisObj = Moralis.Object.extend(Definitions.ExchangeMarketString);
+      var query = new Moralis.Query(moralisObj);
+      query.descending(Definitions.createdAtString);
+      query.equalTo(Definitions.exchangeString, exchange);
 
-    var record = await query.first();
+      var record = await query.first();
 
-    if (record != undefined) {
-      return record.get(Definitions.marketsString);
+      if (record != undefined) {
+        return record.get(Definitions.marketsString);
+      }
+
+      return undefined;
+    } catch (error) {
+      console.log(error);
     }
 
-    return undefined;
   }
 
   /**
@@ -47,17 +52,5 @@ export class MarketsData {
     } catch (error) {
       console.log(error);
     }
-  }
-
-  /**
-   * 
-   * @returns Create array of all supported exchanges in the Exchanges enum.
-   */
-  public getAllExchanges(): Exchanges[] {
-    var exchanges: Exchanges[] = [];
-
-    exchanges.push(Exchanges.Binance, Exchanges.Coinbase);
-
-    return exchanges;
   }
 }

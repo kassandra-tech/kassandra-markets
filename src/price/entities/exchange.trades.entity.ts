@@ -1,10 +1,10 @@
-import { Exchanges } from '../../enums/exchanges.enum';
-import { ExchangeMarket } from './exchange.market.entity';
+import { Exchanges } from "src/enums/exchanges.enum";
+import { Trade } from "./trade.entity";
 
 /**
  * Record that contains the name of the exchange with associated exchange markets.
  */
-export class ExchangeMarkets {
+export class ExchangeTrades {
     /**
      * Exchange hosting the market.
      * @example Binance
@@ -14,9 +14,9 @@ export class ExchangeMarkets {
     /**
      * Markets supported by the exchange.
      */
-    markets: ExchangeMarket[];
+    markets: Trade[];
 
-    public constructor(exchange: Exchanges, markets: ExchangeMarket[]) {
+    public constructor(exchange: Exchanges, markets: Trade[]) {
         this.exchange = exchange;
         this.markets = markets;
     }

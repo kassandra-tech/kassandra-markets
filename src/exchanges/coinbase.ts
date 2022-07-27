@@ -1,6 +1,6 @@
 import { ExchangeMarket } from "src/markets/entities/exchange.market.entity";
 import { ExchangeMarkets } from "src/markets/entities/exchange.markets.entity";
-import { Exchanges } from "src/markets/enums/exchanges.enum";
+import { Exchanges } from "src/enums/exchanges.enum";
 import { CoinbaseMarket } from "src/markets/entities/market.coinbase.entity";
 import { MarketsData } from "src/markets/markets.data";
 

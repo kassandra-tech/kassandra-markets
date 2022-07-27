@@ -6,7 +6,7 @@ import {
 } from '@nestjs/swagger';
 import { MarketsService } from './markets.service';
 import { ExchangeMarkets } from './entities/exchange.markets.entity';
-import { Exchanges } from './enums/exchanges.enum';
+import { Exchanges } from '../enums/exchanges.enum';
 
 /**
  * Provides market API routes.
@@ -27,7 +27,7 @@ export class MarketsController {
     description: "Exchange(s) to return information from.",
     enum: Exchanges,
     isArray: true,
-    required: false
+    required: true
   })
   @ApiResponse({
     status: 200,

@@ -6,7 +6,7 @@ const Moralis = require("moralis/node");
 const serverUrl = "https://fbjp6fpn9cfk.usemoralis.com:2053/server";
 const appId = "2eSJJLFJUsHxYjS0FyMA8YOYyqX44DOKinZkvf8E";
 
-Moralis.start({ serverUrl, appId });
+Moralis.start({ serverUrl: serverUrl, appId: appId });
 
 /**
  * Setup the app and start the server.

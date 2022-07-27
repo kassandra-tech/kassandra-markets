@@ -2,18 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { Binance } from 'src/exchanges/binance';
 import { Coinbase } from 'src/exchanges/coinbase';
 import { ExchangeMarkets } from './entities/exchange.markets.entity';
-import { Exchanges } from './enums/exchanges.enum';
+import { Exchanges } from '../enums/exchanges.enum';
 import { MarketsData } from './markets.data';
+import { Data } from 'src/data/Data';
 
 /**
  * Supported market requests.
  */
 @Injectable()
-export class MarketsService {
+export class MarketsService extends Data {
   private marketsData = new MarketsData();
 
   private binance = new Binance();
   private coinbase = new Coinbase();
+
+  constructor() {
+    super();
+  }
 
   /**
    * Get supported markets for the requested exchange(s),
@@ -26,15 +31,7 @@ export class MarketsService {
     var exchangeList: Exchanges[] = [];
 
     try {
-      if (exchanges.includes(Exchanges.All)) {
-        exchangeList = this.marketsData.getAllExchanges();
-      } else if (Array.isArray(exchanges)) {
-        Array.from(exchanges).forEach(exchange => {
-          exchangeList.push(exchange);
-        })
-      } else {
-        exchangeList.push(exchanges);
-      }
+      exchangeList = this.getExchanges(exchanges);
 
       // Check to see if the database already has an ExchangeMarket for the requested market(s).
       for (const exchange of exchangeList) {
