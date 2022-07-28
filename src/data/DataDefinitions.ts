@@ -34,4 +34,13 @@ export class DataDefinitions {
         this.exchangeString = "exchange";
         this.updatedAtString = "updatedAt";
     }
+
+    /**
+     * Format numbers with 8 decimal places.
+     * @param amount number to format.
+     * @returns formatted number with 8 decimal places.
+     */
+    public cryptoNumberFormat(amount: number): number {
+        return parseFloat(parseFloat(amount.toString()).toFixed(8));
+    }
 }

@@ -32,7 +32,8 @@ export class MarketsController {
   @ApiResponse({
     status: 200,
     description: 'ExchangeMarket(s) with supported markets per exchange.',
-    type: [ExchangeMarkets],
+    type: ExchangeMarkets,
+    isArray: true
   })
   async getExchangeMarkets(@Query('exchanges') exchanges): Promise<ExchangeMarkets[]> {
     return await this.marketsService.getExchangeMarkets(exchanges);

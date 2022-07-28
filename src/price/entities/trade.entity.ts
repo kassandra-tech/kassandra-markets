@@ -1,7 +1,9 @@
+import { CurrentPrice } from "./current.price.entity";
+
 /**
  * Record that contains the name of the exchange with associated exchange markets.
  */
-export class Trade {
+export class Trade extends CurrentPrice {
     /**
      * Price for the trade.
      * @example 0.00001250 
@@ -12,13 +14,13 @@ export class Trade {
      * Amount traded.
      * @example 0.01240000
      */
-    amount: number;
+    quantity: number;
 
     /**
      * Was the order a buy order?
      * @example true
      */
-    isBuy: boolean;
+    isBuyerMaker: boolean;
 
     /**
      * Time of the trade.
@@ -26,10 +28,12 @@ export class Trade {
      */
     tradeTime: number;
 
-    public constructor(price: number, amount: number, isBuy: boolean, time: number) {
-        this.price = price;
-        this.amount = amount;
-        this.isBuy = isBuy;
+    public constructor(market: string, trade: Trade, amount: number, isBuy: boolean, time: number) {
+        super(market, trade);
+
+        this.price = trade.price;
+        this.quantity = amount;
+        this.isBuyerMaker = isBuy;
         this.tradeTime = time;
     }
 }

@@ -4,7 +4,8 @@ import { Exchanges } from "src/enums/exchanges.enum";
 import { MarketsData } from "src/markets/markets.data";
 import { BinanceMarket } from "../markets/entities/market.binance.entity";
 import { PriceData } from "src/price/price.data";
-import { MarketPrice } from "src/price/entities/market.price.entity";
+import { CurrentPrice } from "src/price/entities/current.price.entity";
+import { Price } from "src/price/entities/price.entity";
 
 const BinanceInterface = require('binance-api-node');
 const binance = BinanceInterface.default({
@@ -22,7 +23,8 @@ export class Binance {
 
     private exchangeMarkets: ExchangeMarket[] = [];
     private marketList: string[] = [];
-    private currentPrices: MarketPrice[] = [];
+    private currentPrices: CurrentPrice[] = [];
+    private prices: Price[] = [];
 
     constructor() {
         this.name = Exchanges['Binance'];
@@ -57,24 +59,41 @@ export class Binance {
     }
 
     private async MarketUpdates() {
-        var updateTime = Date.now();
+        var currentPriceUpdateTime = Date.now();
+        var priceUpdateTime = Date.now();
+
+        var currentPrice: CurrentPrice;
+        var price: Price;
 
         await this.updateMarketsList();
 
         binance.ws.trades(this.marketList, (trade) => {
             var market = this.exchangeMarkets.find(market => market.format === trade.symbol);
 
-            var currentPrice: MarketPrice;
             if (currentPrice = this.currentPrices.find(record => record.market === market.market)) {
                 currentPrice.update(trade);
             } else {
-                currentPrice = new MarketPrice(market.market, trade);
+                currentPrice = new CurrentPrice(market.market, trade);
                 this.currentPrices.push(currentPrice);
             }
 
-            if (Date.now() > updateTime + 500) {
-                updateTime = Date.now();
+            if (Date.now() > currentPriceUpdateTime + 1000) {
+                currentPriceUpdateTime = Date.now();
                 this.price.saveCurrentPriceRecord(this.name, this.currentPrices);
+            }
+
+            if (price = this.prices.find(record => record.market === market.market)) {
+                price.update(trade);
+            } else {
+                price = new Price(currentPrice.market, trade);
+                this.prices.push(price);
+            }
+
+            if (Date.now() > priceUpdateTime + 60000) {
+                priceUpdateTime = Date.now();
+                this.price.savePriceRecord(this.name, this.prices);
+
+                this.prices = [];
             }
         });
     }

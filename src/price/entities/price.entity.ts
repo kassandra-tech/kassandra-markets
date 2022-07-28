@@ -1,4 +1,7 @@
+import { DataDefinitions } from "src/data/DataDefinitions";
 import { Trade } from "./trade.entity";
+
+var Data = new DataDefinitions();
 
 /**
  * Record that contains the name of the exchange with associated exchange markets.
@@ -12,23 +15,38 @@ export class Price {
      */
     price: number;
 
+    /**
+     * Lowest price for the market in the time range.
+     */
     lowPrice: number;
 
+    /**
+     * Highest price for the market in the time range.
+     */
     highPrice: number;
 
+    /**
+     * Amount of the currency purchased in the time range.
+     */
     buyVolume: number;
 
+    /**
+     * Amount of currency sold in the time range.
+     */
     sellVolume: number;
 
+    /**
+     * Total amount of currency bought and sold.
+     */
     volume: number;
 
     public constructor(market: string, trade: Trade) {
         this.market = market;
-        this.lowPrice = trade.price;
-        this.highPrice = trade.price;
-        this.buyVolume = 0.0;
-        this.sellVolume = 0.0;
-        this.volume = 0.0;
+        this.lowPrice = Data.cryptoNumberFormat(trade.price);
+        this.highPrice = Data.cryptoNumberFormat(trade.price);
+        this.buyVolume = Data.cryptoNumberFormat(0.00000000);
+        this.sellVolume = Data.cryptoNumberFormat(0.00000000);
+        this.volume = Data.cryptoNumberFormat(0.00000000);
 
         this.update(trade);
     }
@@ -39,8 +57,8 @@ export class Price {
      */
     public update(trade: Trade) {
         try {
-            var price = trade.price;
-            var amount = trade.amount;
+            var price = Data.cryptoNumberFormat(trade.price);
+            var amount = Data.cryptoNumberFormat(trade.quantity);
 
             if (price < this.lowPrice) {
                 this.lowPrice = price;
@@ -48,13 +66,13 @@ export class Price {
                 this.highPrice = price;
             }
 
-            if (trade.isBuy) {
-                this.buyVolume = this.buyVolume + amount;
+            if (trade.isBuyerMaker) {
+                this.buyVolume = Data.cryptoNumberFormat(this.buyVolume + amount);
             } else {
-                this.sellVolume = this.sellVolume + amount;
+                this.sellVolume = Data.cryptoNumberFormat(this.sellVolume + amount);
             }
 
-            this.volume = this.volume + amount;
+            this.volume = Data.cryptoNumberFormat(this.volume + amount);
         } catch (error) {
             console.log(error);
         }
