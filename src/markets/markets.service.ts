@@ -3,7 +3,6 @@ import { Binance } from 'src/exchanges/binance';
 import { Coinbase } from 'src/exchanges/coinbase';
 import { ExchangeMarkets } from './entities/exchange.markets.entity';
 import { Exchanges } from '../enums/exchanges.enum';
-import { MarketsData } from './markets.data';
 import { Data } from 'src/data/Data';
 
 /**
@@ -11,8 +10,6 @@ import { Data } from 'src/data/Data';
  */
 @Injectable()
 export class MarketsService extends Data {
-  private marketsData = new MarketsData();
-
   private binance = new Binance();
   private coinbase = new Coinbase();
 

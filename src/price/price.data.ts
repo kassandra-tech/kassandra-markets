@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Data } from 'src/data/Data';
 import { Exchanges } from 'src/enums/exchanges.enum';
 import { DataDefinitions } from '../data/DataDefinitions';
 import { CurrentPrice } from './entities/current.price.entity';
@@ -14,7 +15,7 @@ const Definitions = new DataDefinitions();
  */
 @Injectable()
 export class PriceData {
-    private priceRecordSaved: boolean = false;
+    private data: Data = new Data();
 
     /**
      * Save the current prices for all markets for the provided exchange.
@@ -26,21 +27,22 @@ export class PriceData {
             var MarketObj = Moralis.Object.extend(Definitions.PriceString);
             var query = new Moralis.Query(MarketObj);
             query.equalTo(Definitions.exchangeString, exchange);
+            query.ascending(Definitions.updatedAtString);
 
-            await query.find().then(priceRecord => {
-                var record = priceRecord[0];
-                if (record !== undefined) {
-                    record.set(Definitions.pricesString, trades);
-                    record.save();
-                } else if (!this.priceRecordSaved) {
-                    var marketObj = new MarketObj();
-                    marketObj.set(Definitions.exchangeString, exchange);
-                    marketObj.set(Definitions.pricesString, trades);
-                    marketObj.save();
+            var records = await query.find();
 
-                    this.priceRecordSaved = true;
-                }
-            });
+            if (records === undefined) {
+                console.log(exchange + ": current price not found");
+            } else if (records.length < 10) {
+                var marketObj = new MarketObj();
+                marketObj.set(Definitions.exchangeString, exchange);
+                marketObj.set(Definitions.pricesString, trades);
+
+                await marketObj.save();
+            } else if (records.length > 0) {
+                records[0].set(Definitions.pricesString, trades);
+                await records[0].save();
+            }
         } catch (error) {
             console.log(error);
         }
@@ -56,14 +58,13 @@ export class PriceData {
             var MarketObj = Moralis.Object.extend(Definitions.PriceString);
             var query = new Moralis.Query(MarketObj);
             query.equalTo(Definitions.exchangeString, exchange);
+            query.descending(Definitions.updatedAtString);
 
-            await query.first().then(priceRecord => {
-                if (priceRecord !== undefined) {
-                    prices = priceRecord.get(Definitions.pricesString);
+            var record = await query.first();
 
-                    return new CurrentPrices(exchange, prices);
-                }
-            });
+            if (record !== undefined) {
+                prices = record.get(Definitions.pricesString);
+            } 
 
             return new CurrentPrices(exchange, prices);
         } catch (error) {
@@ -77,28 +78,48 @@ export class PriceData {
      * @param trades Prices for markets on the exchange.
      */
     public async savePriceRecord(exchange: Exchanges, trades: Price[]) {
-        var MarketObj = Moralis.Object.extend(Definitions.PricesString);
-        var marketObj = new MarketObj();
-        marketObj.set(Definitions.exchangeString, exchange);
-        marketObj.set(Definitions.pricesString, trades);
-        marketObj.save();
+        try {
+            var MarketObj = Moralis.Object.extend(Definitions.PricesString);
+            var marketObj = new MarketObj();
+            marketObj.set(Definitions.exchangeString, exchange);
+            marketObj.set(Definitions.pricesString, trades);
+
+            await marketObj.save();
+        } catch (error) {
+            console.log(error);
+        }
     }
 
-    public async getPriceRecord(exchange: Exchanges): Promise<Prices> {
+    public async getPriceRecord(exchange: Exchanges, minutes: number = 1): Promise<Prices> {
         try {
             var prices: Price[] = [];
             var MarketObj = Moralis.Object.extend(Definitions.PricesString);
             var query = new Moralis.Query(MarketObj);
             query.equalTo(Definitions.exchangeString, exchange);
+            query.greaterThan(Definitions.updatedAtString, this.data.getMinutesBefore(minutes));
             query.descending(Definitions.createdAtString);
 
-            await query.first().then(priceRecord => {
-                if (priceRecord !== undefined) {
-                    prices = priceRecord.get(Definitions.pricesString);
+            var records = await query.find();
 
-                    return new Prices(exchange, prices);
-                }
-            });
+            if (records === undefined) {
+                console.log(exchange + ": unable to get price record");
+            } else if (records.length > 0) {
+                records.forEach(record => {
+                    var recordPrices: Price[] = record.get(Definitions.pricesString);
+
+                    recordPrices.forEach(priceRecord => {
+                        var price = prices.find(price => price.market === priceRecord.market);
+
+                        if (price !== undefined) {
+                            price.updatePrice(priceRecord);
+                        } else {
+                            var newPrice = new Price(priceRecord.market);
+                            newPrice.updatePrice(priceRecord);
+                            prices.push(newPrice);
+                        }
+                    })
+                });
+            }
 
             return new Prices(exchange, prices);
         } catch (error) {

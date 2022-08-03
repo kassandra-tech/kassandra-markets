@@ -2,9 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { DataDefinitions } from '../data/DataDefinitions';
 import { ExchangeMarkets } from './entities/exchange.markets.entity';
 import { Exchanges } from '../enums/exchanges.enum';
+import { Data } from 'src/data/Data';
+import { ExchangeMarket } from './entities/exchange.market.entity';
+import { CurrencyInformation } from './entities/currency.information.entity';
+import { Market } from './entities/market.entity';
+import { CurrentPrice } from 'src/price/entities/current.price.entity';
+import { Prices } from 'src/price/entities/prices.entity';
 
 const Moralis = require("moralis/node");
 const Definitions = new DataDefinitions();
+const data = new Data();
 
 /**
  * Interact with the Kassandra datastore to retrieve and store market data.
@@ -16,10 +23,11 @@ export class MarketsData {
    * @param exchange Exchange to get markets for.
    * @returns ExchangeMarkets record with all supported markets.
    */
-  public async getExchangeMarketsRecord(exchange: Exchanges): Promise<ExchangeMarkets> {
+  public async getExchangeMarketRecord(exchange: Exchanges): Promise<ExchangeMarkets> {
     try {
       var moralisObj = Moralis.Object.extend(Definitions.ExchangeMarketString);
       var query = new Moralis.Query(moralisObj);
+      query.greaterThan(Definitions.createdAtString, data.getDaysBefore());
       query.descending(Definitions.createdAtString);
       query.equalTo(Definitions.exchangeString, exchange);
 
@@ -47,6 +55,56 @@ export class MarketsData {
       var marketObj = new moralisObj();
       marketObj.set(Definitions.exchangeString, exchange);
       marketObj.set(Definitions.marketsString, markets);
+
+      await marketObj.save();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  public async getCurrencyInformation(): Promise<CurrencyInformation[]> {
+    try {
+      var currencyInfo: CurrencyInformation[] = [];
+      var moralisObj = Moralis.Object.extend(Definitions.CurrencyInformationString);
+      var query = new Moralis.Query(moralisObj);
+      query.descending(Definitions.createdAtString);
+
+      var record = await query.first();
+
+      currencyInfo = record.get(Definitions.currenciesString);
+
+      return currencyInfo;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async saveMarketRecord(exchange: Exchanges, exchangeMarkets: ExchangeMarket[], currentPrices: CurrentPrice[], prices: Prices) {
+    try {
+      var list: Market[] = [];
+
+      prices.prices.forEach(price => {
+        var market = list.find(market => market.market === price.market);
+
+        if (market !== undefined) {
+          var price = prices.prices.find(priceRecord => priceRecord.market === price.market);
+          market.update(price);
+        } else {
+          var exchangeMarket = exchangeMarkets.find(exchangeMarket => exchangeMarket.market === price.market);
+          var currentPrice = currentPrices.find(currentPrice => currentPrice.market === price.market);
+          var priceRecord = prices.prices.find(priceRecord => priceRecord.market === price.market);
+
+          if (exchangeMarket !== undefined && currentPrice !== undefined && priceRecord !== undefined) {
+            var marketRecord = new Market(exchangeMarket, currentPrice, priceRecord, [exchange]);
+
+            list.push(marketRecord);
+          }
+        }
+      });
+
+      var MarketObj = Moralis.Object.extend(Definitions.marketRecordString);
+      var marketObj = new MarketObj();
+      marketObj.set(Definitions.marketsString, list);
 
       await marketObj.save();
     } catch (error) {

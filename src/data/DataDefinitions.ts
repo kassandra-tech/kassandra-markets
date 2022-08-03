@@ -9,6 +9,7 @@ export class DataDefinitions {
     MarketsString: string;
     marketsString: string;
     marketRecordString: string;
+    MarketExchangesString: string;
     PriceString: string;
     PricesString: string;
     pricesString: string;
@@ -25,6 +26,8 @@ export class DataDefinitions {
         this.MarketsString = "Markets";
         this.marketsString = "markets";
         this.marketRecordString = "MarketRecord";
+
+        this.MarketExchangesString = "MarketExchanges";
 
         this.PriceString = "Price";
         this.PricesString = "Prices";

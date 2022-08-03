@@ -27,13 +27,4 @@ export class Trade extends CurrentPrice {
      * @example 1658954273792
      */
     tradeTime: number;
-
-    public constructor(market: string, trade: Trade, amount: number, isBuy: boolean, time: number) {
-        super(market, trade);
-
-        this.price = trade.price;
-        this.quantity = amount;
-        this.isBuyerMaker = isBuy;
-        this.tradeTime = time;
-    }
 }

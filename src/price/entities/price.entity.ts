@@ -40,15 +40,21 @@ export class Price {
      */
     volume: number;
 
-    public constructor(market: string, trade: Trade) {
+    public constructor(market: string, trade: Trade = undefined) {
         this.market = market;
-        this.lowPrice = Data.cryptoNumberFormat(trade.price);
-        this.highPrice = Data.cryptoNumberFormat(trade.price);
+
+        this.lowPrice = Data.cryptoNumberFormat(0.00000000);
+        this.highPrice = Data.cryptoNumberFormat(0.00000000);
         this.buyVolume = Data.cryptoNumberFormat(0.00000000);
         this.sellVolume = Data.cryptoNumberFormat(0.00000000);
         this.volume = Data.cryptoNumberFormat(0.00000000);
 
-        this.update(trade);
+        if (trade !== undefined) {
+            this.lowPrice = Data.cryptoNumberFormat(trade.price);
+            this.highPrice = Data.cryptoNumberFormat(trade.price);
+
+            this.update(trade);
+        }
     }
 
     /**
@@ -72,6 +78,27 @@ export class Price {
                 this.sellVolume = Data.cryptoNumberFormat(this.sellVolume + amount);
             }
 
+            this.volume = Data.cryptoNumberFormat(this.volume + amount);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    public updatePrice(price: Price) {
+        try {
+            var amount = Data.cryptoNumberFormat(price.volume);
+
+            if (this.lowPrice === 0 || this.highPrice === 0) {
+                this.lowPrice = price.lowPrice;
+                this.highPrice = price.highPrice;
+            } else if (price.lowPrice < this.lowPrice) {
+                this.lowPrice = price.lowPrice;
+            } else if (price.highPrice > this.highPrice) {
+                this.highPrice = price.highPrice;
+            }
+
+            this.buyVolume = Data.cryptoNumberFormat(this.buyVolume + price.buyVolume);
+            this.sellVolume = Data.cryptoNumberFormat(this.sellVolume + price.sellVolume);
             this.volume = Data.cryptoNumberFormat(this.volume + amount);
         } catch (error) {
             console.log(error);

@@ -24,6 +24,25 @@ export class Data {
     }
 
     /**
+     * Get the number of days before the current time.
+     * @param days Number of days before the current time.
+     * @returns Time number of days before the current time.
+     */
+    public getDaysBefore(days: number = 1): Date {
+        return new Date((new Date(Date.now()).getTime() - (60 * 60 * 1000 * 24 * days)));
+    }
+
+    /**
+     * Get the number of minutes before the current time.
+     * NOTE: one additional minute is added to account for timing of when records are written to the database.
+     * @param minutes 
+     * @returns Number of minutes before the current time.
+     */
+    public getMinutesBefore(minutes: number = 1): Date {
+        return new Date((new Date(Date.now()).getTime() - (60 * 1000 * minutes + 1)));
+    }
+
+    /**
      * Get All supported exchanges.
      * @returns All supported exchanges.
      */
