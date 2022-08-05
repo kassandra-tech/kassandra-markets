@@ -7,7 +7,7 @@ import { PriceData } from "src/price/price.data";
 import { CurrentPrice } from "src/price/entities/current.price.entity";
 import { Price } from "src/price/entities/price.entity";
 import { Prices } from "src/price/entities/prices.entity";
-import { PriceTrigger } from "src/data/PriceTrigger";
+import { TimeHelpers } from "src/data/TimeHelpers";
 import { CurrencyData } from "src/currency/currency.data";
 
 const BinanceInterface = require('binance-api-node');
@@ -71,9 +71,9 @@ export class Binance {
     }
 
     private async update() {
-        var currentPriceTime = new PriceTrigger();
-        var priceTime = new PriceTrigger();
-        var priceRecordTime = new PriceTrigger();
+        var currentPriceTime = new TimeHelpers();
+        var priceTime = new TimeHelpers();
+        var priceRecordTime = new TimeHelpers();
 
         var currentPrice: CurrentPrice;
         var price: Price;

@@ -1,12 +1,10 @@
-import { Data } from "src/data/Data";
+import { Base } from "src/data/Base";
 import { Exchanges } from "src/enums/exchanges.enum";
-
-var data: Data = new Data();
 
 /**
  * Additional details about a curreny.
  */
-export class Currency {
+export class Currency extends Base {
     /**
      * Currency symbol.
      * @example BTC
@@ -38,6 +36,8 @@ export class Currency {
     exchanges: Exchanges[];
 
     constructor(symbol: string, exchange: Exchanges) {
+        super();
+
         this.symbol = symbol;
         this.name = "";
         this.rank = 0;
@@ -60,7 +60,7 @@ export class Currency {
     }
 
     public includesExchanges(exchanges: Exchanges[]): boolean {
-        exchanges = data.getExchanges(exchanges);
+        exchanges = this.getExchanges(exchanges);
 
         exchanges.forEach(exchange => {
             if (this.exchanges.includes(exchange)) {

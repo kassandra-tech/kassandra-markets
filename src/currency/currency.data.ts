@@ -1,14 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Data } from 'src/data/Data';
+import { Base } from 'src/data/Base';
 import { Exchanges } from 'src/enums/exchanges.enum';
 import { ExchangeMarket } from 'src/markets/entities/exchange.market.entity';
-import { DataDefinitions } from '../data/DataDefinitions';
 import { Currency } from './entity/currency.entity';
 
 const Moralis = require("moralis/node");
-const Definitions = new DataDefinitions();
 
-const data: Data = new Data();
 var currencyInfo: Currency[] = [];
 var currencies: Currency[] = [];
 var symbols: string[] = [];
@@ -17,7 +14,7 @@ var symbols: string[] = [];
  * Interact with the Kassandra datastore to retrieve and store market data.
  */
 @Injectable()
-export class CurrencyData {
+export class CurrencyData extends Base {
     public initialized: boolean;
 
     public async initialize(exchange: Exchanges, markets: ExchangeMarket[]) {
@@ -48,14 +45,14 @@ export class CurrencyData {
 
     public async getCurrencyInformation(): Promise<Currency[]> {
         try {
-            var moralisObj = Moralis.Object.extend(Definitions.CurrencyInformationString);
+            var moralisObj = Moralis.Object.extend(this.Definitions.CurrencyInformationString);
             var query = new Moralis.Query(moralisObj);
-            query.descending(Definitions.createdAtString);
+            query.descending(this.Definitions.createdAtString);
 
             var record = await query.first();
 
             if (record !== undefined) {
-                currencyInfo = record.get(Definitions.currenciesString);
+                currencyInfo = record.get(this.Definitions.currenciesString);
             }
         } catch (error) {
             console.log(error);
@@ -105,10 +102,10 @@ export class CurrencyData {
 
     public async writeCurrencies(currencies: Currency[]) {
         try {
-            const Currency = Moralis.Object.extend(Definitions.CurrenciesString);
+            const Currency = Moralis.Object.extend(this.Definitions.CurrenciesString);
             const currency = new Currency();
 
-            currency.set(Definitions.currenciesString, currencies);
+            currency.set(this.Definitions.currenciesString, currencies);
 
             await currency.save();
         } catch (error) {
@@ -120,15 +117,15 @@ export class CurrencyData {
 
     public async getCurrencies(exchanges: Exchanges[]): Promise<Currency[]> {
         try {
-            exchanges = data.getExchanges(exchanges);
-            const Currencies = Moralis.Object.extend(Definitions.CurrenciesString);
+            exchanges = this.getExchanges(exchanges);
+            const Currencies = Moralis.Object.extend(this.Definitions.CurrenciesString);
             const query = new Moralis.Query(Currencies);
-            query.descending(Definitions.updatedAtString);
+            query.descending(this.Definitions.updatedAtString);
 
             var record = await query.first();
 
             if (record !== undefined) {
-                var currencies: Currency[] = record.get(Definitions.currenciesString);
+                var currencies: Currency[] = record.get(this.Definitions.currenciesString);
 
                 if (currencies !== undefined) {
                     currencies.forEach(currency => {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Data } from 'src/data/Data';
+import { Base } from 'src/data/Base';
 import { Exchanges } from 'src/enums/exchanges.enum';
 import { CurrentPrices } from './entities/current.prices.entity';
 import { Prices } from './entities/prices.entity';
@@ -9,7 +9,7 @@ import { PriceData } from './price.data';
  * Supported market requests.
  */
 @Injectable()
-export class PriceService extends Data {
+export class PriceService extends Base {
   private price = new PriceData();
 
   public constructor() {

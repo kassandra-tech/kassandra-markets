@@ -1,36 +1,45 @@
 /**
- * Kassandra definitions for accessing data from the Kassandra datastore.
+ * Definitions for accessing data from the Kassandra datastore.
  */
 export class DataDefinitions {
-    CurrenciesString: string;
-    currenciesString: string;
+    /**
+     * Kassandra objects
+     */
+
     CurrencyInformationString: string;
+    CurrenciesString: string;
     ExchangeMarketString: string;
     MarketsString: string;
-    marketsString: string;
-    marketRecordString: string;
-    MarketExchangesString: string;
     PriceString: string;
     PricesString: string;
+
+    /**
+     * Kassandra object properties
+     */
+
+    currenciesString: string;
+    marketsString: string;
+    marketRecordString: string;
     pricesString: string;
+
+    /**
+     * Moralis properties
+     */
     createdAtString: string;
     exchangeString: string;
     updatedAtString: string;
 
     constructor() {
-        this.CurrenciesString = "Currencies";
-        this.currenciesString = "currencies";
         this.CurrencyInformationString = "CurrencyInformation";
-
+        this.CurrenciesString = "Currencies";
         this.ExchangeMarketString = "ExchangeMarket";
         this.MarketsString = "Markets";
-        this.marketsString = "markets";
-        this.marketRecordString = "MarketRecord";
-
-        this.MarketExchangesString = "MarketExchanges";
-
         this.PriceString = "Price";
         this.PricesString = "Prices";
+
+        this.currenciesString = "currencies";
+        this.marketsString = "markets";
+        this.marketRecordString = "MarketRecord";
         this.pricesString = "prices";
 
         this.createdAtString = "createdAt";
