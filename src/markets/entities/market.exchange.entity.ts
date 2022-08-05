@@ -1,5 +1,5 @@
 import { Exchanges } from '../../enums/exchanges.enum';
-import { CurrencyInformation } from './currency.information.entity';
+import { Currency } from '../../currency/entity/currency.entity';
 import { ExchangeMarket } from './exchange.market.entity';
 
 export class MarketExchange {
@@ -46,7 +46,7 @@ export class MarketExchange {
      */
          exchanges: Exchanges[] = [];
 
-    public constructor(exchange: Exchanges, exchangeMarket: ExchangeMarket, currencyInformation: CurrencyInformation) {
+    public constructor(exchange: Exchanges, exchangeMarket: ExchangeMarket, currencyInformation: Currency) {
         this.update(exchange);
         this.market = exchangeMarket.market;
         this.currency = exchangeMarket.currency;

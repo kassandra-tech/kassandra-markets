@@ -8,6 +8,6 @@ import { PriceService } from './price.service';
 })
 
 /**
- * Market routing and service details to request market information.
+ * Market routing and service details to request price information.
  */
 export class PriceModule { }

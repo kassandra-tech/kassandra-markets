@@ -4,9 +4,9 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Exchanges } from '../enums/exchanges.enum';
 import { MarketsService } from './markets.service';
 import { ExchangeMarkets } from './entities/exchange.markets.entity';
-import { Exchanges } from '../enums/exchanges.enum';
 
 /**
  * Provides market API routes.

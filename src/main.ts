@@ -1,17 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+
 const Moralis = require("moralis/node");
 
 const serverUrl = "https://fbjp6fpn9cfk.usemoralis.com:2053/server";
 const appId = "2eSJJLFJUsHxYjS0FyMA8YOYyqX44DOKinZkvf8E";
 
+Moralis.start({ serverUrl, appId });
+
 /**
  * Setup the app and start the server.
  */
 async function bootstrap() {
-  await Moralis.start({ serverUrl: serverUrl, appId: appId });
-
   const app = await NestFactory.create(AppModule);
   const options = new DocumentBuilder()
     .setTitle('Exchange market information')

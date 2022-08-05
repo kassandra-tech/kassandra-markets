@@ -22,7 +22,7 @@ export class Data {
 
         return exchangeList;
     }
-
+    
     /**
      * Get the number of days before the current time.
      * @param days Number of days before the current time.

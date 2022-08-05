@@ -4,10 +4,10 @@ import { ExchangeMarkets } from './entities/exchange.markets.entity';
 import { Exchanges } from '../enums/exchanges.enum';
 import { Data } from 'src/data/Data';
 import { ExchangeMarket } from './entities/exchange.market.entity';
-import { CurrencyInformation } from './entities/currency.information.entity';
 import { Market } from './entities/market.entity';
 import { CurrentPrice } from 'src/price/entities/current.price.entity';
 import { Prices } from 'src/price/entities/prices.entity';
+import { CurrencyData } from 'src/currency/currency.data';
 
 const Moralis = require("moralis/node");
 const Definitions = new DataDefinitions();
@@ -18,6 +18,12 @@ const data = new Data();
  */
 @Injectable()
 export class MarketsData {
+  public currencyData: CurrencyData;
+
+  constructor() {
+    this.currencyData = new CurrencyData();
+  }
+
   /**
    * Get ExchangeMarkets record in the Kassandra datastore for the requested exchange.
    * @param exchange Exchange to get markets for.
@@ -62,26 +68,13 @@ export class MarketsData {
     }
   }
 
-  public async getCurrencyInformation(): Promise<CurrencyInformation[]> {
-    try {
-      var currencyInfo: CurrencyInformation[] = [];
-      var moralisObj = Moralis.Object.extend(Definitions.CurrencyInformationString);
-      var query = new Moralis.Query(moralisObj);
-      query.descending(Definitions.createdAtString);
 
-      var record = await query.first();
-
-      currencyInfo = record.get(Definitions.currenciesString);
-
-      return currencyInfo;
-    } catch (error) {
-      console.log(error);
-    }
-  }
 
   async saveMarketRecord(exchange: Exchanges, exchangeMarkets: ExchangeMarket[], currentPrices: CurrentPrice[], prices: Prices) {
     try {
       var list: Market[] = [];
+
+      await this.updateCurrencies(exchange, exchangeMarkets);
 
       prices.prices.forEach(price => {
         var market = list.find(market => market.market === price.market);
@@ -111,4 +104,11 @@ export class MarketsData {
       console.log(error);
     }
   }
+
+  private async updateCurrencies(exchange: Exchanges, exchangeMarkets: ExchangeMarket[]) {
+    if (!this.currencyData.initialized) {
+
+        await this.currencyData.initialize(exchange, exchangeMarkets);
+    }
+}
 }

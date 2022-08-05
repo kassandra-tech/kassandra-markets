@@ -5,9 +5,9 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { Exchanges } from 'src/enums/exchanges.enum';
+import { PriceService } from './price.service';
 import { CurrentPrices } from './entities/current.prices.entity';
 import { Prices } from './entities/prices.entity';
-import { PriceService } from './price.service';
 
 /**
  * Provides market API routes.

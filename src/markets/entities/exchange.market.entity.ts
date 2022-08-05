@@ -1,5 +1,3 @@
-import { CurrencyInformation } from "./currency.information.entity";
-
 /**
  * Common market format so all exchanges can be easily accessed by Kassandra.
  */
@@ -52,17 +50,5 @@ export class ExchangeMarket {
     this.format = format;
     this.currency = currency;
     this.quoteCurrency = quoteCurrency;
-  }
-
-  /**
-   * Update the currency information for the market.
-   * @param currencyInformation Currency information: currency name, rank, and rating.
-   */
-  public updateCurrencyInformation(currencyInformation: CurrencyInformation) {
-    if (currencyInformation !== undefined) {
-      this.currencyName = currencyInformation.name;
-      this.rank = currencyInformation.rank;
-      this.rating = currencyInformation.rating;
-    }
   }
 }

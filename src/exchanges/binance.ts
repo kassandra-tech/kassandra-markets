@@ -6,9 +6,9 @@ import { BinanceMarket } from "./entities/market.binance.entity";
 import { PriceData } from "src/price/price.data";
 import { CurrentPrice } from "src/price/entities/current.price.entity";
 import { Price } from "src/price/entities/price.entity";
-import { CurrencyInformation } from "src/markets/entities/currency.information.entity";
 import { Prices } from "src/price/entities/prices.entity";
 import { PriceTrigger } from "src/data/PriceTrigger";
+import { CurrencyData } from "src/currency/currency.data";
 
 const BinanceInterface = require('binance-api-node');
 const binance = BinanceInterface.default({
@@ -21,18 +21,23 @@ const binance = BinanceInterface.default({
  */
 export class Binance {
     public name: Exchanges;
-    private marketsData: MarketsData = new MarketsData();
-    private price: PriceData = new PriceData();
-
-    private exchangeMarkets: ExchangeMarket[] = [];
-    private currencyInfo: CurrencyInformation[] = [];
-    private marketList: string[] = [];
-    private currentPrices: CurrentPrice[] = [];
-    private prices: Price[] = [];
+    public currencyData: CurrencyData;
+    public marketsData: MarketsData;
+    public priceData: PriceData;
+    private exchangeMarkets: ExchangeMarket[];
+    private currentPrices: CurrentPrice[];
+    private prices: Price[];
 
     constructor() {
-        this.name = Exchanges.Binance;
-        this.MarketUpdates();
+        this.name = Exchanges.Coinbase;
+        this.currencyData = new CurrencyData();
+        this.marketsData = new MarketsData();
+        this.priceData = new PriceData();
+        this.exchangeMarkets = [];
+        this.currentPrices = [];
+        this.prices = [];
+
+        this.update();
     }
 
     /**
@@ -49,16 +54,15 @@ export class Binance {
                 const exchangeInfo = await binance.exchangeInfo();
 
                 var markets: BinanceMarket[] = exchangeInfo.symbols;
-                markets.forEach(market => {
-                    var exchangeMarket = new ExchangeMarket(market.symbol, market.baseAsset, market.quoteAsset);
-                    var info = this.currencyInfo.find(info => info.symbol === exchangeMarket.currency);
-                    exchangeMarket.updateCurrencyInformation(info);
-
-                    this.exchangeMarkets.push(exchangeMarket);
-                });
-
-                await this.marketsData.saveExchangeMarkets(this.name, new ExchangeMarkets(this.name, this.exchangeMarkets));
+                if (markets !== undefined) {
+                    markets.forEach(market => {
+                        var exchangeMarket = new ExchangeMarket(market.symbol, market.baseAsset, market.quoteAsset);
+                        this.exchangeMarkets.push(exchangeMarket);
+                    })
+                }
             }
+
+            this.currencyData.saveCurrencies(this.name);
 
             return new ExchangeMarkets(this.name, this.exchangeMarkets);
         } catch (error) {
@@ -66,7 +70,7 @@ export class Binance {
         }
     }
 
-    private async MarketUpdates() {
+    private async update() {
         var currentPriceTime = new PriceTrigger();
         var priceTime = new PriceTrigger();
         var priceRecordTime = new PriceTrigger();
@@ -74,10 +78,9 @@ export class Binance {
         var currentPrice: CurrentPrice;
         var price: Price;
 
-        await this.updateMarketsList();
-        await this.updateCurrencyInformation();
+        var marketsFormat = await this.getMarketsFormat();
 
-        binance.ws.trades(this.marketList, async (trade) => {
+        binance.ws.trades(marketsFormat, async (trade) => {
             try {
                 var market = this.exchangeMarkets.find(market => market.format === trade.symbol);
 
@@ -89,24 +92,23 @@ export class Binance {
                 }
 
                 if (currentPriceTime.secondUpdate(1)) {
-                    await this.price.saveCurrentPriceRecord(this.name, this.currentPrices);
+                    await this.priceData.saveCurrentPriceRecord(this.name, this.currentPrices);
                 }
 
                 if (price = this.prices.find(record => record.market === market.market)) {
-                    price.update(trade);
                 } else {
                     price = new Price(currentPrice.market, trade);
                     this.prices.push(price);
                 }
 
                 if (priceTime.minuteUpdate(1)) {
-                    await this.price.savePriceRecord(this.name, this.prices);
+                    await this.priceData.savePriceRecord(this.name, this.prices);
 
                     this.prices = [];
                 }
 
                 if (priceRecordTime.minuteUpdate(5)) {
-                    var prices: Prices = await this.price.getPriceRecord(this.name, 5);
+                    var prices: Prices = await this.priceData.getPriceRecord(this.name, 5);
 
                     if (prices !== undefined && prices.prices.length > 0) {
                         await this.marketsData.saveMarketRecord(this.name, this.exchangeMarkets, this.currentPrices, prices);
@@ -118,15 +120,21 @@ export class Binance {
         });
     }
 
-    private async updateMarketsList() {
-        var exchangeMarket = await this.getMarkets();
+    private async getMarketsFormat() {
+        var exchangeFormatMarkets: string[] = [];
 
-        exchangeMarket.markets.forEach((market) => {
-            this.marketList.push(market.format);
-        })
-    }
+        try {
+            var exchangeMarket = await this.getMarkets();
 
-    private async updateCurrencyInformation() {
-        this.currencyInfo = await this.marketsData.getCurrencyInformation();
+            if (exchangeMarket !== undefined) {
+                exchangeMarket.markets.forEach((market) => {
+                    exchangeFormatMarkets.push(market.format);
+                })
+            }
+        } catch (error) {
+            console.log(error);
+        }
+
+        return exchangeFormatMarkets;
     }
 }

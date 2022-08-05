@@ -1,8 +1,6 @@
 import { CurrentPrice } from 'src/price/entities/current.price.entity';
 import { Price } from 'src/price/entities/price.entity';
 import { Exchanges } from '../../enums/exchanges.enum';
-import { MarketsData } from '../markets.data';
-import { CurrencyInformation } from './currency.information.entity';
 import { ExchangeMarket } from './exchange.market.entity';
 
 /**
