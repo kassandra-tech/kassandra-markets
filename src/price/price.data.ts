@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Base } from 'src/data/Base';
-import { TimeHelpers } from 'src/data/TimeHelpers';
+import { MoralisHelpers } from 'src/data/MoralisHelpers';
 import { Exchanges } from 'src/enums/exchanges.enum';
 import { CurrentPrice } from './entities/current.price.entity';
 import { CurrentPrices } from './entities/current.prices.entity';
@@ -8,12 +7,12 @@ import { Price } from './entities/price.entity';
 import { Prices } from './entities/prices.entity';
 
 const Moralis = require("moralis/node");
-const time = new TimeHelpers();
+
 /**
  * Interact with the Kassandra datastore to retrieve and store market data.
  */
 @Injectable()
-export class PriceData extends Base{
+export class PriceData extends MoralisHelpers {
     /**
      * Save the current prices for all markets for the provided exchange.
      * @param exchange Exchanges to get the current market prices from.
@@ -51,17 +50,7 @@ export class PriceData extends Base{
      */
     public async getCurrentPriceRecord(exchange: Exchanges): Promise<CurrentPrices> {
         try {
-            var prices: CurrentPrice[] = [];
-            var MarketObj = Moralis.Object.extend(this.Definitions.PriceString);
-            var query = new Moralis.Query(MarketObj);
-            query.equalTo(this.Definitions.exchangeString, exchange);
-            query.descending(this.Definitions.updatedAtString);
-
-            var record = await query.first();
-
-            if (record !== undefined) {
-                prices = record.get(this.Definitions.pricesString);
-            } 
+            var prices: CurrentPrice[] = await this.getKassandraData(this.Definitions.PriceString, this.Definitions.pricesString, exchange);
 
             return new CurrentPrices(exchange, prices);
         } catch (error) {
@@ -75,28 +64,14 @@ export class PriceData extends Base{
      * @param trades Prices for markets on the exchange.
      */
     public async savePriceRecord(exchange: Exchanges, trades: Price[]) {
-        try {
-            var MarketObj = Moralis.Object.extend(this.Definitions.PricesString);
-            var marketObj = new MarketObj();
-            marketObj.set(this.Definitions.exchangeString, exchange);
-            marketObj.set(this.Definitions.pricesString, trades);
-
-            await marketObj.save();
-        } catch (error) {
-            console.log(error);
-        }
+        await this.saveKassandraData(this.Definitions.PricesString, this.Definitions.pricesString, trades, exchange)
     }
 
     public async getPriceRecord(exchange: Exchanges, minutes: number = 1): Promise<Prices> {
         try {
             var prices: Price[] = [];
-            var MarketObj = Moralis.Object.extend(this.Definitions.PricesString);
-            var query = new Moralis.Query(MarketObj);
-            query.equalTo(this.Definitions.exchangeString, exchange);
-            query.greaterThan(this.Definitions.updatedAtString, time.getMinutesBefore(minutes));
-            query.descending(this.Definitions.createdAtString);
 
-            var records = await query.find();
+            var records = await this.getKassandraObjects(this.Definitions.PricesString, exchange, minutes);
 
             if (records === undefined) {
                 console.log(exchange + ": unable to get price record");

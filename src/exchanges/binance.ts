@@ -29,7 +29,7 @@ export class Binance {
     private prices: Price[];
 
     constructor() {
-        this.name = Exchanges.Coinbase;
+        this.name = Exchanges.Binance;
         this.currencyData = new CurrencyData();
         this.marketsData = new MarketsData();
         this.priceData = new PriceData();
@@ -62,7 +62,7 @@ export class Binance {
                 }
             }
 
-            this.currencyData.saveCurrencies(this.name);
+            await this.currencyData.saveCurrencies(this.name);
 
             return new ExchangeMarkets(this.name, this.exchangeMarkets);
         } catch (error) {
@@ -96,6 +96,7 @@ export class Binance {
                 }
 
                 if (price = this.prices.find(record => record.market === market.market)) {
+                    price.updatePrice(new Price(currentPrice.market, trade));
                 } else {
                     price = new Price(currentPrice.market, trade);
                     this.prices.push(price);
@@ -117,7 +118,7 @@ export class Binance {
             } catch (error) {
                 console.log(error);
             }
-        });
+        })
     }
 
     private async getMarketsFormat() {

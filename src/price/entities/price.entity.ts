@@ -43,6 +43,7 @@ export class Price {
     public constructor(market: string, trade: Trade = undefined) {
         this.market = market;
 
+        this.price = Data.cryptoNumberFormat(0.00000000);
         this.lowPrice = Data.cryptoNumberFormat(0.00000000);
         this.highPrice = Data.cryptoNumberFormat(0.00000000);
         this.buyVolume = Data.cryptoNumberFormat(0.00000000);
@@ -50,37 +51,17 @@ export class Price {
         this.volume = Data.cryptoNumberFormat(0.00000000);
 
         if (trade !== undefined) {
+            this.price = Data.cryptoNumberFormat(trade.price);
             this.lowPrice = Data.cryptoNumberFormat(trade.price);
             this.highPrice = Data.cryptoNumberFormat(trade.price);
 
-            this.update(trade);
-        }
-    }
-
-    /**
-     * Update price and volume properties of the market.
-     * @param trade Trade to update market price and volume information from.
-     */
-    public update(trade: Trade) {
-        try {
-            var price = Data.cryptoNumberFormat(trade.price);
-            var amount = Data.cryptoNumberFormat(trade.quantity);
-
-            if (price < this.lowPrice) {
-                this.lowPrice = price;
-            } else if (price > this.highPrice) {
-                this.highPrice = price;
-            }
-
             if (trade.isBuyerMaker) {
-                this.buyVolume = Data.cryptoNumberFormat(this.buyVolume + amount);
+                this.buyVolume = Data.cryptoNumberFormat(this.buyVolume + trade.quantity);
             } else {
-                this.sellVolume = Data.cryptoNumberFormat(this.sellVolume + amount);
+                this.sellVolume = Data.cryptoNumberFormat(this.sellVolume + trade.quantity);
             }
 
-            this.volume = Data.cryptoNumberFormat(this.volume + amount);
-        } catch (error) {
-            console.log(error);
+            this.volume = Data.cryptoNumberFormat(this.volume + trade.quantity);
         }
     }
 

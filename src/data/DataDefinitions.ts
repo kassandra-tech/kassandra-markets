@@ -19,7 +19,7 @@ export class DataDefinitions {
 
     currenciesString: string;
     marketsString: string;
-    marketRecordString: string;
+    MarketRecordString: string;
     pricesString: string;
 
     /**
@@ -34,12 +34,12 @@ export class DataDefinitions {
         this.CurrenciesString = "Currencies";
         this.ExchangeMarketString = "ExchangeMarket";
         this.MarketsString = "Markets";
+        this.MarketRecordString = "MarketRecord";
         this.PriceString = "Price";
         this.PricesString = "Prices";
 
         this.currenciesString = "currencies";
         this.marketsString = "markets";
-        this.marketRecordString = "MarketRecord";
         this.pricesString = "prices";
 
         this.createdAtString = "createdAt";

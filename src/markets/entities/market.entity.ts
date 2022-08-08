@@ -11,20 +11,14 @@ export class Market {
      * Two currencies being traded.
      * @example BTC-USD
      */
-    market: string;
     currency: string;
     quoteCurrency: string;
     currencyName: string;
     rank: number;
     rating: string;
-    price: number;
-    lowPrice: number;
-    highPrice: number;
     pricePercentage: number;
     priceLabel: string;
-    buyVolume: number;
-    sellVolume: number;
-    volume: number;
+    price: Price;
     exchanges: Exchanges[];
     exchangeMarket: ExchangeMarket
 
@@ -32,35 +26,35 @@ export class Market {
         currentPrice: CurrentPrice,
         price: Price,
         exchanges: Exchanges[]) {
-        this.market = exchangeMarket.market;
+        this.price = price;
         this.currency = exchangeMarket.currency;
         this.currencyName = exchangeMarket.currencyName;
         this.rank = exchangeMarket.rank;
         this.rating = exchangeMarket.rating;
+        this.priceLabel = "";
+        this.pricePercentage = 0;
 
         if (currentPrice !== undefined) {
-            this.price = currentPrice.price;
+            this.price.price = currentPrice.price;
         }
-
-        if (price !== undefined) {
-            this.lowPrice = price.lowPrice;
-            this.highPrice = price.highPrice;
-            this.buyVolume = price.buyVolume;
-            this.sellVolume = price.sellVolume;
-            this.volume = price.volume;
-        }
-
+        
         this.exchanges = exchanges;
+
+        this.updatePrice(price);
     }
 
-    update(price: Price) {
+    /**
+     * Update the market price with the given price details.
+     * @param price Price to update existing record for.
+     */
+    public updatePrice(price: Price) {
         try {
-            if (price.lowPrice < this.lowPrice || this.lowPrice === 0.0) {
-                this.lowPrice = price.lowPrice;
+            if (price.lowPrice < this.price.lowPrice || this.price.lowPrice === 0.0) {
+                this.price.lowPrice = price.lowPrice;
             }
 
-            if (price.highPrice > this.highPrice) {
-                this.highPrice = price.highPrice;
+            if (price.highPrice > this.price.highPrice) {
+                this.price.highPrice = price.highPrice;
             }
 
             var currentPrice = price.price;
@@ -96,9 +90,9 @@ export class Market {
                 this.pricePercentage = highPercentage;
             }
 
-            this.buyVolume = price.buyVolume + this.buyVolume;
-            this.sellVolume = price.sellVolume + this.sellVolume;
-            this.volume = price.volume + this.volume;
+            this.price.buyVolume = price.buyVolume + this.price.buyVolume;
+            this.price.sellVolume = price.sellVolume + this.price.sellVolume;
+            this.price.volume = price.volume + this.price.volume;
         } catch (error) {
             console.log(error);
         }

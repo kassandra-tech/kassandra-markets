@@ -47,7 +47,7 @@ export class Coinbase {
                 }
             }
 
-            this.currencyData.saveCurrencies(this.name);
+            await this.currencyData.saveCurrencies(this.name);
 
             return new ExchangeMarkets(this.name, this.exchangeMarkets);
         } catch (error) {

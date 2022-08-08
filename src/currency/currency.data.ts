@@ -1,25 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { Base } from 'src/data/Base';
+import { MoralisHelpers } from 'src/data/MoralisHelpers';
 import { Exchanges } from 'src/enums/exchanges.enum';
 import { ExchangeMarket } from 'src/markets/entities/exchange.market.entity';
 import { Currency } from './entity/currency.entity';
-
-const Moralis = require("moralis/node");
 
 var currencyInfo: Currency[] = [];
 var currencies: Currency[] = [];
 var symbols: string[] = [];
 
 /**
- * Interact with the Kassandra datastore to retrieve and store market data.
+ * Interact with the Kassandra datastore to retrieve and store currency data.
  */
 @Injectable()
-export class CurrencyData extends Base {
-    public initialized: boolean;
+export class CurrencyData extends MoralisHelpers {
+    public initialized: boolean = false;
 
+    /**
+     * Initialize the currency for the requested exchange.
+     * @param exchange Exchange to initialize.
+     * @param markets Markets for the requested exchange.
+     * @returns True, when all information needed to use currencies has been found.
+     */
     public async initialize(exchange: Exchanges, markets: ExchangeMarket[]) {
         try {
-            await this.getCurrencyInformation();
+            currencyInfo = await this.getCurrencyInformation();
 
             var response = await this.getCurrencies([exchange]);
 
@@ -36,31 +40,26 @@ export class CurrencyData extends Base {
                     symbols.push(market.quoteCurrency);
                 }
             })
-
-            return this.initialized = currencyInfo.length > 0 && currencies.length > 0 && symbols.length > 0;
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    public async getCurrencyInformation(): Promise<Currency[]> {
-        try {
-            var moralisObj = Moralis.Object.extend(this.Definitions.CurrencyInformationString);
-            var query = new Moralis.Query(moralisObj);
-            query.descending(this.Definitions.createdAtString);
-
-            var record = await query.first();
-
-            if (record !== undefined) {
-                currencyInfo = record.get(this.Definitions.currenciesString);
-            }
         } catch (error) {
             console.log(error);
         } finally {
-            return currencyInfo = currencyInfo;
+            return this.initialized = currencyInfo.length > 0 && currencies.length > 0 && symbols.length > 0;
         }
+
     }
 
+    /**
+     * Get details about currencies (name, rank, rating).
+     * @returns Currency Information for all provided currencies.
+     */
+    public async getCurrencyInformation(): Promise<Currency[]> {
+        return await this.getKassandraData(this.Definitions.CurrencyInformationString, this.Definitions.currenciesString);
+    }
+
+    /**
+     * Save currencies to the datastore if there is an update to the currencies.
+     * @param exchange Exchange to save currencies for.
+     */
     public async saveCurrencies(exchange: Exchanges) {
         try {
             var isUpdated: boolean;
@@ -90,53 +89,34 @@ export class CurrencyData extends Base {
                 })
 
                 if (currencies.length > 0 && isUpdated) {
-                    await this.writeCurrencies(currencies);
+                    await this.saveKassandraData(this.Definitions.CurrenciesString, this.Definitions.currenciesString, currencies);
                 }
             }
         } catch (error) {
             console.log(error);
-        } finally {
-            return currencies;
         }
     }
 
-    public async writeCurrencies(currencies: Currency[]) {
-        try {
-            const Currency = Moralis.Object.extend(this.Definitions.CurrenciesString);
-            const currency = new Currency();
-
-            currency.set(this.Definitions.currenciesString, currencies);
-
-            await currency.save();
-        } catch (error) {
-            console.log(error);
-        } finally {
-            return currencies;
-        }
-    }
-
+    /**
+     * Get currencies for the requested exchange(s).
+     * @param exchanges Exchanges to get currencies for.
+     * @returns Currencies for the requested exchange(s).
+     */
     public async getCurrencies(exchanges: Exchanges[]): Promise<Currency[]> {
         try {
             exchanges = this.getExchanges(exchanges);
-            const Currencies = Moralis.Object.extend(this.Definitions.CurrenciesString);
-            const query = new Moralis.Query(Currencies);
-            query.descending(this.Definitions.updatedAtString);
 
-            var record = await query.first();
+            var currencies: Currency[] = await this.getKassandraData(this.Definitions.CurrenciesString, this.Definitions.currenciesString);
 
-            if (record !== undefined) {
-                var currencies: Currency[] = record.get(this.Definitions.currenciesString);
-
-                if (currencies !== undefined) {
-                    currencies.forEach(currency => {
-                        exchanges.forEach(exchange => {
-                            if (currency.exchanges.includes(exchange) && !currencies.includes(currency)) {
-                                currencies.push(currency);
-                            }
-                        })
-
+            if (currencies !== undefined) {
+                currencies.forEach(currency => {
+                    exchanges.forEach(exchange => {
+                        if (currency.exchanges.includes(exchange) && !currencies.includes(currency)) {
+                            currencies.push(currency);
+                        }
                     })
-                }
+
+                })
             }
         } catch (error) {
             console.log(error);
