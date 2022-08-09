@@ -62,7 +62,7 @@ export class Coinbase {
                     this.getMarkets();
                 }
     
-                await this.currencyData.initialize(this.name, this.exchangeMarkets);
+                await this.currencyData.isInitialize(this.name, this.exchangeMarkets);
             }
         } catch (error) {
             console.log(error);

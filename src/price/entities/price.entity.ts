@@ -42,7 +42,6 @@ export class Price {
 
     public constructor(market: string, trade: Trade = undefined) {
         this.market = market;
-
         this.price = Data.cryptoNumberFormat(0.00000000);
         this.lowPrice = Data.cryptoNumberFormat(0.00000000);
         this.highPrice = Data.cryptoNumberFormat(0.00000000);
@@ -55,34 +54,58 @@ export class Price {
             this.lowPrice = Data.cryptoNumberFormat(trade.price);
             this.highPrice = Data.cryptoNumberFormat(trade.price);
 
-            if (trade.isBuyerMaker) {
-                this.buyVolume = Data.cryptoNumberFormat(this.buyVolume + trade.quantity);
-            } else {
-                this.sellVolume = Data.cryptoNumberFormat(this.sellVolume + trade.quantity);
-            }
-
-            this.volume = Data.cryptoNumberFormat(this.volume + trade.quantity);
+            this.updateTrade(trade);
         }
     }
 
-    public updatePrice(price: Price) {
-        try {
-            var amount = Data.cryptoNumberFormat(price.volume);
+    /**
+     * Update the price with the given trade information.
+     * @param trade Trade to update price information from.
+     */
+    public updateTrade(trade: Trade) {
+        if (trade !== undefined) {
+            try {
+                this.price = Data.cryptoNumberFormat(trade.price);
 
-            if (this.lowPrice === 0 || this.highPrice === 0) {
-                this.lowPrice = price.lowPrice;
-                this.highPrice = price.highPrice;
-            } else if (price.lowPrice < this.lowPrice) {
-                this.lowPrice = price.lowPrice;
+                if (this.lowPrice === 0 && this.highPrice === 0) {
+                    this.lowPrice = Data.cryptoNumberFormat(trade.price);
+                    this.highPrice = Data.cryptoNumberFormat(trade.price);
+                } else if (this.price < this.lowPrice) {
+                    this.lowPrice = this.price;
+                } else if (this.price > this.highPrice) {
+                    this.highPrice = this.price;
+                }
+
+                if (trade.isBuyerMaker) {
+                    this.buyVolume = this.buyVolume + Data.cryptoNumberFormat(trade.quantity);
+                } else {
+                    this.sellVolume = this.sellVolume + Data.cryptoNumberFormat(trade.quantity);
+                }
+
+                this.volume = this.buyVolume + this.sellVolume;
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    }
+
+    /**
+     * Update the price with additional price information.
+     * @param price Update the price record with the given price.
+     */
+    public updatePrice(price: Price) {
+        if (price !== undefined) {
+            this.price = Data.cryptoNumberFormat(price.price);
+
+            if (price.lowPrice < this.lowPrice) {
+                this.lowPrice = Data.cryptoNumberFormat(price.lowPrice);
             } else if (price.highPrice > this.highPrice) {
-                this.highPrice = price.highPrice;
+                this.highPrice = Data.cryptoNumberFormat(price.highPrice);
             }
 
-            this.buyVolume = Data.cryptoNumberFormat(this.buyVolume + price.buyVolume);
-            this.sellVolume = Data.cryptoNumberFormat(this.sellVolume + price.sellVolume);
-            this.volume = Data.cryptoNumberFormat(this.volume + amount);
-        } catch (error) {
-            console.log(error);
+            this.buyVolume = this.buyVolume + Data.cryptoNumberFormat(price.buyVolume);
+            this.sellVolume = this.sellVolume + Data.cryptoNumberFormat(price.sellVolume);
+            this.volume = this.buyVolume + Data.cryptoNumberFormat(this.sellVolume);
         }
     }
 }

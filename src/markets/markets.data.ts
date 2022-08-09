@@ -39,6 +39,13 @@ export class MarketsData extends MoralisHelpers {
     await this.saveKassandraData(this.Definitions.ExchangeMarketString, this.Definitions.marketsString, markets, exchange);
   }
 
+  /**
+   * Save a market record.
+   * @param exchange Exchange to store the market record for.
+   * @param exchangeMarkets Markets for the exchange.
+   * @param currentPrices  Current exchange market prices.
+   * @param prices Exchange historical prices.
+   */
   async saveMarketRecord(exchange: Exchanges, exchangeMarkets: ExchangeMarket[], currentPrices: CurrentPrice[], prices: Prices) {
     try {
       var list: Market[] = [];
@@ -50,7 +57,9 @@ export class MarketsData extends MoralisHelpers {
 
         if (market !== undefined) {
           var price = prices.prices.find(priceRecord => priceRecord.market === price.market);
-          market.updatePrice(price);
+          if (price !== undefined) {
+            market.updatePrice(price);
+          }
         } else {
           var exchangeMarket = exchangeMarkets.find(exchangeMarket => exchangeMarket.market === price.market);
           var currentPrice = currentPrices.find(currentPrice => currentPrice.market === price.market);
@@ -73,7 +82,7 @@ export class MarketsData extends MoralisHelpers {
   private async updateCurrencies(exchange: Exchanges, exchangeMarkets: ExchangeMarket[]) {
     if (!this.currencyData.initialized) {
 
-      await this.currencyData.initialize(exchange, exchangeMarkets);
+      await this.currencyData.isInitialize(exchange, exchangeMarkets);
     }
   }
 }

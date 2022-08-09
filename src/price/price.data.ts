@@ -67,6 +67,13 @@ export class PriceData extends MoralisHelpers {
         await this.saveKassandraData(this.Definitions.PricesString, this.Definitions.pricesString, trades, exchange)
     }
 
+    /**
+     * Get the price record(s) for the requested exchange.
+     * When minutes are larget than 1, all records between the current time and number of minutes requested will be returned and combined.
+     * @param exchange Exchange to return price records for.
+     * @param minutes Number of minutes before the current time to find records for.
+     * @returns 
+     */
     public async getPriceRecord(exchange: Exchanges, minutes: number = 1): Promise<Prices> {
         try {
             var prices: Price[] = [];

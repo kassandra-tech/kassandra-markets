@@ -21,25 +21,33 @@ export class CurrencyData extends MoralisHelpers {
      * @param markets Markets for the requested exchange.
      * @returns True, when all information needed to use currencies has been found.
      */
-    public async initialize(exchange: Exchanges, markets: ExchangeMarket[]) {
+    public async isInitialize(exchange: Exchanges, markets: ExchangeMarket[]) {
         try {
-            currencyInfo = await this.getCurrencyInformation();
+            if (!this.isInitialize) {
+                currencyInfo = await this.getCurrencyInformation();
 
-            var response = await this.getCurrencies([exchange]);
+                if (currencyInfo === undefined) {
+                    currencyInfo = [];
+                }
 
-            if (response !== undefined && response.length > 0) {
-                currencies = response;
+                var response = await this.getCurrencies([exchange]);
+
+                if (response !== undefined && response.length > 0) {
+                    currencies = response;
+                }
+
+                if (markets !== undefined) {
+                    markets.forEach(market => {
+                        if (!symbols.includes(market.currency)) {
+                            symbols.push(market.currency);
+                        }
+
+                        if (!symbols.includes(market.quoteCurrency)) {
+                            symbols.push(market.quoteCurrency);
+                        }
+                    })
+                }
             }
-
-            markets.forEach(market => {
-                if (!symbols.includes(market.currency)) {
-                    symbols.push(market.currency);
-                }
-
-                if (!symbols.includes(market.quoteCurrency)) {
-                    symbols.push(market.quoteCurrency);
-                }
-            })
         } catch (error) {
             console.log(error);
         } finally {

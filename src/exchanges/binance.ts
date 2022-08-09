@@ -9,6 +9,7 @@ import { Price } from "src/price/entities/price.entity";
 import { Prices } from "src/price/entities/prices.entity";
 import { TimeHelpers } from "src/data/TimeHelpers";
 import { CurrencyData } from "src/currency/currency.data";
+import { Market } from "src/markets/entities/market.entity";
 
 const BinanceInterface = require('binance-api-node');
 const binance = BinanceInterface.default({
@@ -75,19 +76,21 @@ export class Binance {
         var priceTime = new TimeHelpers();
         var priceRecordTime = new TimeHelpers();
 
-        var currentPrice: CurrentPrice;
-        var price: Price;
-
         var marketsFormat = await this.getMarketsFormat();
 
         binance.ws.trades(marketsFormat, async (trade) => {
             try {
                 var market = this.exchangeMarkets.find(market => market.format === trade.symbol);
+                var marketName = "";
+                if (market !== undefined) {
+                    marketName = market.market;
+                }
 
-                if (currentPrice = this.currentPrices.find(record => record.market === market.market)) {
-                    currentPrice.update(trade);
+                var currentPrice = this.currentPrices.find(record => record.market === marketName);
+                if (currentPrice !== undefined) {
+                    currentPrice.updatePrice(trade);
                 } else {
-                    currentPrice = new CurrentPrice(market.market, trade);
+                    currentPrice = new CurrentPrice(marketName, trade);
                     this.currentPrices.push(currentPrice);
                 }
 
@@ -95,10 +98,11 @@ export class Binance {
                     await this.priceData.saveCurrentPriceRecord(this.name, this.currentPrices);
                 }
 
-                if (price = this.prices.find(record => record.market === market.market)) {
-                    price.updatePrice(new Price(currentPrice.market, trade));
+                price = this.prices.find(record => record.market === marketName);
+                if (price !== undefined) {
+                    price.updateTrade(trade);
                 } else {
-                    price = new Price(currentPrice.market, trade);
+                    var price = new Price(currentPrice.market, trade);
                     this.prices.push(price);
                 }
 

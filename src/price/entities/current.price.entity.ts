@@ -24,11 +24,15 @@ export class CurrentPrice {
 
     public constructor(market: string, trade: Trade) {
         this.market = market;
-        this.time = trade.tradeTime;
-        this.price = trade.price;
+        
+        this.updatePrice(trade);
     }
 
-    public update(trade: Trade) {
+    /**
+     * Update the time and price of the current price.
+     * @param trade Trade to update time and price for the current price.
+     */
+    public updatePrice(trade: Trade) {
         try {
             this.time = trade.tradeTime;
             this.price = trade.price;

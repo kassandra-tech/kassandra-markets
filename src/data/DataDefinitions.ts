@@ -53,6 +53,9 @@ export class DataDefinitions {
      * @returns formatted number with 8 decimal places.
      */
     public cryptoNumberFormat(amount: number): number {
+        if (amount === null) {
+            amount = 0;
+        }
         return parseFloat(parseFloat(amount.toString()).toFixed(8));
     }
 }
