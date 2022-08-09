@@ -26,25 +26,6 @@ export class ExchangeMarket {
    */
   quoteCurrency: string;
 
-  /**
- * Name of the currency.
- * @example Bitcoin
- */
-  currencyName: string;
-
-  /**
-   * Net worth among traded cryptocurrencies and tokens.
-   * Higher is better.
-   * @example 1
-   */
-  rank: number
-
-  /**
-   * Measure of relative security around investing in and trading a crypto asset.
-   * @example A-
-   */
-  rating: string;
-
   constructor(format: string, currency: string, quoteCurrency: string) {
     this.market = currency + '-' + quoteCurrency;
     this.format = format;

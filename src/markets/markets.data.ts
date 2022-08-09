@@ -64,9 +64,10 @@ export class MarketsData extends MoralisHelpers {
           var exchangeMarket = exchangeMarkets.find(exchangeMarket => exchangeMarket.market === price.market);
           var currentPrice = currentPrices.find(currentPrice => currentPrice.market === price.market);
           var priceRecord = prices.prices.find(priceRecord => priceRecord.market === price.market);
+          var currency = this.currencyData.currencies.find(currency => currency.symbol == exchangeMarket.currency);
 
-          if (exchangeMarket !== undefined && currentPrice !== undefined && priceRecord !== undefined) {
-            var marketRecord = new Market(exchangeMarket, currentPrice, priceRecord, [exchange]);
+          if (exchangeMarket !== undefined && currentPrice !== undefined && priceRecord !== undefined && currency != undefined) {
+            var marketRecord = new Market(currency, exchangeMarket.quoteCurrency, currentPrice, priceRecord, [exchange]);
 
             list.push(marketRecord);
           }
@@ -79,10 +80,9 @@ export class MarketsData extends MoralisHelpers {
     }
   }
 
-  private async updateCurrencies(exchange: Exchanges, exchangeMarkets: ExchangeMarket[]) {
-    if (!this.currencyData.initialized) {
-
-      await this.currencyData.isInitialize(exchange, exchangeMarkets);
+  private async updateCurrencies(exchange: Exchanges, exchangeMarkets: ExchangeMarket[]) { // TODO Need to check for new currencies
+    if (!this.currencyData.isInitialized) {
+      await this.currencyData.initialize(exchange, exchangeMarkets);
     }
   }
 }

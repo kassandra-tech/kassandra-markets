@@ -9,7 +9,6 @@ import { Price } from "src/price/entities/price.entity";
 import { Prices } from "src/price/entities/prices.entity";
 import { TimeHelpers } from "src/data/TimeHelpers";
 import { CurrencyData } from "src/currency/currency.data";
-import { Market } from "src/markets/entities/market.entity";
 
 const BinanceInterface = require('binance-api-node');
 const binance = BinanceInterface.default({

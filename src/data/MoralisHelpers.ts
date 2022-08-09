@@ -73,16 +73,18 @@ export class MoralisHelpers extends Base {
      */
     public async saveKassandraData(objectName: string, savePropertyName: string, objectToSave, exchange: Exchanges = Exchanges.All) {
         try {
-            const kassandraObject = Moralis.Object.extend(objectName);
-            const property = new kassandraObject();
+            if (objectToSave.length > 0) {
+                const kassandraObject = Moralis.Object.extend(objectName);
+                const property = new kassandraObject();
 
-            property.set(savePropertyName, objectToSave);
+                property.set(savePropertyName, objectToSave);
 
-            if (exchange !== Exchanges.All) {
-                property.set(this.Definitions.exchangeString, exchange);
+                if (exchange !== Exchanges.All) {
+                    property.set(this.Definitions.exchangeString, exchange);
+                }
+
+                await property.save();
             }
-
-            await property.save();
         } catch (error) {
             console.log(error);
         }

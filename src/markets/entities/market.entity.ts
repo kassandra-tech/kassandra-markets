@@ -1,3 +1,4 @@
+import { Currency } from 'src/currency/entity/currency.entity';
 import { DataDefinitions } from 'src/data/DataDefinitions';
 import { CurrentPrice } from 'src/price/entities/current.price.entity';
 import { Price } from 'src/price/entities/price.entity';
@@ -14,7 +15,7 @@ export class Market {
      * Two currencies being traded.
      * @example BTC-USD
      */
-    currency: string;
+    currency: Currency;
     quoteCurrency: string;
     currencyName: string;
     rank: number;
@@ -25,11 +26,9 @@ export class Market {
     exchanges: Exchanges[];
     exchangeMarket: ExchangeMarket
 
-    constructor(exchangeMarket: ExchangeMarket, currentPrice: CurrentPrice, price: Price, exchanges: Exchanges[]) {
-        this.currency = exchangeMarket.currency;
-        this.currencyName = exchangeMarket.currencyName;
-        this.rank = exchangeMarket.rank;
-        this.rating = exchangeMarket.rating;
+    constructor(currency: Currency, quoteCurrency: string, currentPrice: CurrentPrice, price: Price, exchanges: Exchanges[]) {
+        this.currency = currency;
+        this.quoteCurrency = quoteCurrency;
         this.price = price;
         this.priceLabel = "";
         this.pricePercentage = 0.0;
@@ -39,7 +38,7 @@ export class Market {
 
         if (currentPrice !== undefined) {
             this.price.price = Data.cryptoNumberFormat(currentPrice.price);
-        } else {
+        } else if (price !== undefined) {
             this.price.price = Data.cryptoNumberFormat(price.price);
         }
     }

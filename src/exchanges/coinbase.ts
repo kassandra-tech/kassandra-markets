@@ -57,12 +57,12 @@ export class Coinbase {
 
     private async update() {
         try {
-            if (!this.currencyData.initialized) {
+            if (!this.currencyData.isInitialized) {
                 if (this.exchangeMarkets.length === 0) {
                     this.getMarkets();
                 }
     
-                await this.currencyData.isInitialize(this.name, this.exchangeMarkets);
+                await this.currencyData.initialize(this.name, this.exchangeMarkets);
             }
         } catch (error) {
             console.log(error);

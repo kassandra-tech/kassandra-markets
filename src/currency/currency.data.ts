@@ -5,7 +5,6 @@ import { ExchangeMarket } from 'src/markets/entities/exchange.market.entity';
 import { Currency } from './entity/currency.entity';
 
 var currencyInfo: Currency[] = [];
-var currencies: Currency[] = [];
 var symbols: string[] = [];
 
 /**
@@ -13,7 +12,8 @@ var symbols: string[] = [];
  */
 @Injectable()
 export class CurrencyData extends MoralisHelpers {
-    public initialized: boolean = false;
+    public isInitialized: boolean = false;
+    public currencies: Currency[] = [];
 
     /**
      * Initialize the currency for the requested exchange.
@@ -21,37 +21,35 @@ export class CurrencyData extends MoralisHelpers {
      * @param markets Markets for the requested exchange.
      * @returns True, when all information needed to use currencies has been found.
      */
-    public async isInitialize(exchange: Exchanges, markets: ExchangeMarket[]) {
+    public async initialize(exchange: Exchanges, markets: ExchangeMarket[]) {
         try {
-            if (!this.isInitialize) {
-                currencyInfo = await this.getCurrencyInformation();
+            currencyInfo = await this.getCurrencyInformation();
 
-                if (currencyInfo === undefined) {
-                    currencyInfo = [];
-                }
+            if (currencyInfo === undefined) {
+                currencyInfo = [];
+            }
 
-                var response = await this.getCurrencies([exchange]);
+            var response = await this.getCurrencies([exchange]);
 
-                if (response !== undefined && response.length > 0) {
-                    currencies = response;
-                }
+            if (response !== undefined && response.length > 0) {
+                this.currencies = response;
+            }
 
-                if (markets !== undefined) {
-                    markets.forEach(market => {
-                        if (!symbols.includes(market.currency)) {
-                            symbols.push(market.currency);
-                        }
+            if (markets !== undefined) {
+                markets.forEach(market => {
+                    if (!symbols.includes(market.currency)) {
+                        symbols.push(market.currency);
+                    }
 
-                        if (!symbols.includes(market.quoteCurrency)) {
-                            symbols.push(market.quoteCurrency);
-                        }
-                    })
-                }
+                    if (!symbols.includes(market.quoteCurrency)) {
+                        symbols.push(market.quoteCurrency);
+                    }
+                })
             }
         } catch (error) {
             console.log(error);
         } finally {
-            return this.initialized = currencyInfo.length > 0 && currencies.length > 0 && symbols.length > 0;
+            return this.isInitialized = currencyInfo.length > 0 && this.currencies.length > 0 && symbols.length > 0;
         }
 
     }
@@ -74,7 +72,7 @@ export class CurrencyData extends MoralisHelpers {
 
             if (currencyInfo.length > 0) {
                 symbols.forEach(symbol => {
-                    var currency: Currency = currencies.find(currency => currency.name === symbol);
+                    var currency: Currency = this.currencies.find(currency => currency.symbol === symbol);
 
                     if (currency !== undefined) {
                         if (!currency.exchanges.includes(exchange)) {
@@ -82,7 +80,7 @@ export class CurrencyData extends MoralisHelpers {
                             isUpdated = true;
                         }
 
-                        currencies.push(currency);
+                        this.currencies.push(currency);
                     } else {
                         currency = new Currency(symbol, exchange);
 
@@ -92,12 +90,12 @@ export class CurrencyData extends MoralisHelpers {
                             currency.updateInfo(info.name, info.rank, info.rating);
                         }
 
-                        currencies.push(currency);
+                        this.currencies.push(currency);
                     }
                 })
 
-                if (currencies.length > 0 && isUpdated) {
-                    await this.saveKassandraData(this.Definitions.CurrenciesString, this.Definitions.currenciesString, currencies);
+                if (this.currencies.length > 0 && isUpdated) {
+                    await this.saveKassandraData(this.Definitions.CurrenciesString, this.Definitions.currenciesString, this.currencies);
                 }
             }
         } catch (error) {
