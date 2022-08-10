@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { MoralisHelpers } from 'src/data/MoralisHelpers';
+import { KassandraData } from 'src/data/KassandraData';
 import { Exchanges } from 'src/enums/exchanges.enum';
 import { ExchangeMarket } from 'src/markets/entities/exchange.market.entity';
+import { Market } from 'src/markets/entities/market.entity';
 import { Currency } from './entity/currency.entity';
 
 var currencyInfo: Currency[] = [];
@@ -11,9 +12,10 @@ var symbols: string[] = [];
  * Interact with the Kassandra datastore to retrieve and store currency data.
  */
 @Injectable()
-export class CurrencyData extends MoralisHelpers {
-    public isInitialized: boolean = false;
+export class CurrencyData extends KassandraData {
     public currencies: Currency[] = [];
+    private markets: Market[] = [];
+    private exchangeMarkets: ExchangeMarket[] = [];
 
     /**
      * Initialize the currency for the requested exchange.
@@ -48,10 +50,7 @@ export class CurrencyData extends MoralisHelpers {
             }
         } catch (error) {
             console.log(error);
-        } finally {
-            return this.isInitialized = currencyInfo.length > 0 && this.currencies.length > 0 && symbols.length > 0;
         }
-
     }
 
     /**
@@ -65,10 +64,18 @@ export class CurrencyData extends MoralisHelpers {
     /**
      * Save currencies to the datastore if there is an update to the currencies.
      * @param exchange Exchange to save currencies for.
+     * @param markets Markets to update currencies from.
      */
-    public async saveCurrencies(exchange: Exchanges) {
+    public async saveCurrencies(exchange: Exchanges, markets: ExchangeMarket[]) {
         try {
             var isUpdated: boolean;
+
+            var updatedMarkets = this.updateExchangeMarkets(this.exchangeMarkets, markets);
+
+            if (this.exchangeMarkets != updatedMarkets) {
+                this.exchangeMarkets = updatedMarkets;
+                this.initialize(exchange, this.exchangeMarkets);
+            }
 
             if (currencyInfo.length > 0) {
                 symbols.forEach(symbol => {
@@ -110,6 +117,7 @@ export class CurrencyData extends MoralisHelpers {
      */
     public async getCurrencies(exchanges: Exchanges[]): Promise<Currency[]> {
         try {
+
             exchanges = this.getExchanges(exchanges);
 
             var currencies: Currency[] = await this.getKassandraData(this.Definitions.CurrenciesString, this.Definitions.currenciesString);

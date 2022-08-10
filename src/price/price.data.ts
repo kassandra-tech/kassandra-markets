@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MoralisHelpers } from 'src/data/MoralisHelpers';
+import { KassandraData } from 'src/data/KassandraData';
 import { Exchanges } from 'src/enums/exchanges.enum';
 import { CurrentPrice } from './entities/current.price.entity';
 import { CurrentPrices } from './entities/current.prices.entity';
@@ -12,7 +12,7 @@ const Moralis = require("moralis/node");
  * Interact with the Kassandra datastore to retrieve and store market data.
  */
 @Injectable()
-export class PriceData extends MoralisHelpers {
+export class PriceData extends KassandraData {
     /**
      * Save the current prices for all markets for the provided exchange.
      * @param exchange Exchanges to get the current market prices from.
@@ -78,7 +78,7 @@ export class PriceData extends MoralisHelpers {
         try {
             var prices: Price[] = [];
 
-            var records = await this.getKassandraObjects(this.Definitions.PricesString, exchange, minutes);
+            var records = await this.getKassandraObjects(this.Definitions.PricesString, minutes, exchange);
 
             if (records === undefined) {
                 console.log(exchange + ": unable to get price record");

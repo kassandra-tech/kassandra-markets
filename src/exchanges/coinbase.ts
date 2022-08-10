@@ -23,7 +23,7 @@ export class Coinbase {
         this.marketsData = new MarketsData();
         this.exchangeMarkets = [];
 
-        this.update();
+        this.getMarkets();
     }
 
     /**
@@ -47,23 +47,9 @@ export class Coinbase {
                 }
             }
 
-            await this.currencyData.saveCurrencies(this.name);
+            await this.currencyData.saveCurrencies(this.name, this.exchangeMarkets);
 
             return new ExchangeMarkets(this.name, this.exchangeMarkets);
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    private async update() {
-        try {
-            if (!this.currencyData.isInitialized) {
-                if (this.exchangeMarkets.length === 0) {
-                    this.getMarkets();
-                }
-    
-                await this.currencyData.initialize(this.name, this.exchangeMarkets);
-            }
         } catch (error) {
             console.log(error);
         }

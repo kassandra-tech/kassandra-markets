@@ -10,11 +10,7 @@ import { PriceData } from './price.data';
  */
 @Injectable()
 export class PriceService extends Base {
-  private price = new PriceData();
-
-  public constructor() {
-    super();
-  }
+  private Data = new PriceData();
 
   /**
    * Get supported markets for the requested exchange(s),
@@ -26,15 +22,12 @@ export class PriceService extends Base {
     var exchangeList: Exchanges[] = this.getExchanges(exchanges);
 
     try {
-      // Check to see if the database already has an ExchangeMarket for the requested market(s).
       for (const exchange of exchangeList) {
         var prices: CurrentPrices;
 
-        if (exchange === Exchanges.Binance) {
-          prices = await this.price.getCurrentPriceRecord(exchange);
-          exchangePrices.push(prices);
-        } else if (exchange === Exchanges.Coinbase) {
-          prices = await this.price.getCurrentPriceRecord(exchange);
+        prices = await this.Data.getCurrentPriceRecord(exchange);
+
+        if (prices !== undefined) {
           exchangePrices.push(prices);
         }
       }
@@ -55,17 +48,14 @@ export class PriceService extends Base {
       var exchangeList: Exchanges[] = this.getExchanges(exchanges);
   
       try {
-        // Check to see if the database already has an ExchangeMarket for the requested market(s).
         for (const exchange of exchangeList) {
           var prices: Prices;
   
-          if (exchange === Exchanges.Binance) {
-            prices = await this.price.getPriceRecord(exchange);
-            exchangePrices.push(prices);
-          } else if (exchange === Exchanges.Coinbase) {
-            prices = await this.price.getPriceRecord(exchange);
-            exchangePrices.push(prices);
-          }
+            prices = await this.Data.getPriceRecord(exchange);
+
+            if (prices !== undefined) {
+              exchangePrices.push(prices);
+            }
         }
   
         return exchangePrices;

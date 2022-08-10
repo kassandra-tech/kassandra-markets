@@ -5,21 +5,15 @@ import { ExchangeMarket } from './entities/exchange.market.entity';
 import { Market } from './entities/market.entity';
 import { CurrentPrice } from 'src/price/entities/current.price.entity';
 import { Prices } from 'src/price/entities/prices.entity';
+import { KassandraData } from 'src/data/KassandraData';
 import { CurrencyData } from 'src/currency/currency.data';
-import { MoralisHelpers } from 'src/data/MoralisHelpers';
 
 /**
  * Interact with the Kassandra datastore to retrieve and store market data.
  */
 @Injectable()
-export class MarketsData extends MoralisHelpers {
-  public currencyData: CurrencyData;
-
-  constructor() {
-    super();
-
-    this.currencyData = new CurrencyData();
-  }
+export class MarketsData extends KassandraData {
+  private Data: CurrencyData = new CurrencyData();
 
   /**
    * Get ExchangeMarkets record in the Kassandra datastore for the requested exchange.
@@ -50,7 +44,7 @@ export class MarketsData extends MoralisHelpers {
     try {
       var list: Market[] = [];
 
-      await this.updateCurrencies(exchange, exchangeMarkets);
+      await this.Data.saveCurrencies(exchange, exchangeMarkets);
 
       prices.prices.forEach(price => {
         var market = list.find(market => market.price.market === price.market);
@@ -64,25 +58,20 @@ export class MarketsData extends MoralisHelpers {
           var exchangeMarket = exchangeMarkets.find(exchangeMarket => exchangeMarket.market === price.market);
           var currentPrice = currentPrices.find(currentPrice => currentPrice.market === price.market);
           var priceRecord = prices.prices.find(priceRecord => priceRecord.market === price.market);
-          var currency = this.currencyData.currencies.find(currency => currency.symbol == exchangeMarket.currency);
+          var currency = this.Data.currencies.find(currency => currency.symbol == exchangeMarket.currency);
 
           if (exchangeMarket !== undefined && currentPrice !== undefined && priceRecord !== undefined && currency != undefined) {
             var marketRecord = new Market(currency, exchangeMarket.quoteCurrency, currentPrice, priceRecord, [exchange]);
 
             list.push(marketRecord);
           }
+
         }
       })
 
       await this.saveKassandraData(this.Definitions.MarketRecordString, this.Definitions.marketsString, list);
     } catch (error) {
       console.log(error);
-    }
-  }
-
-  private async updateCurrencies(exchange: Exchanges, exchangeMarkets: ExchangeMarket[]) { // TODO Need to check for new currencies
-    if (!this.currencyData.isInitialized) {
-      await this.currencyData.initialize(exchange, exchangeMarkets);
     }
   }
 }

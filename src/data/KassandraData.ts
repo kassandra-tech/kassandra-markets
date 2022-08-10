@@ -8,7 +8,7 @@ const time = new TimeHelpers();
 /**
  * Provides access to storing data in the Kassandra datastore.
  */
-export class MoralisHelpers extends Base {
+export class KassandraData extends Base {
     /**
      * Get Kassandra data objects from the Kassandra datastore.
      * Note: Desired properties will need to be read from the returned objects.
@@ -17,11 +17,14 @@ export class MoralisHelpers extends Base {
      * @param minutesBefore Number of minutes before the current time to return data from. 
      * @returns Requested objects from the Kassandra datastore.
      */
-    public async getKassandraObjects(objectName: string, exchange: Exchanges, minutesBefore: number) {
+    public async getKassandraObjects(objectName: string, minutesBefore: number, exchange: Exchanges = Exchanges.All) {
         try {
             var kassandraObject = Moralis.Object.extend(objectName);
             var query = new Moralis.Query(kassandraObject);
-            query.equalTo(this.Definitions.exchangeString, exchange);
+
+            if (exchange !== Exchanges.All) {
+                query.equalTo(this.Definitions.exchangeString, exchange);
+            }
             query.descending(this.Definitions.updatedAtString);
             query.greaterThan(this.Definitions.updatedAtString, time.getMinutesBefore(minutesBefore));
 

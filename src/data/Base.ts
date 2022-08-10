@@ -1,4 +1,5 @@
 import { Exchanges } from "src/enums/exchanges.enum";
+import { ExchangeMarket } from "src/markets/entities/exchange.market.entity";
 import { DataDefinitions } from "./DataDefinitions";
 
 /**
@@ -29,5 +30,34 @@ export class Base {
         }
 
         return exchangeList;
+    }
+
+    /**
+     * Sort the given markets by market name.
+     * @param markets ExchangeMarkets to sort.
+     * @returns sorted ExchangeMarkets.
+     */
+    public sortByExchangeMarket(markets: ExchangeMarket[]): ExchangeMarket[] {
+        markets.sort((market1, market2) => (market1.market > market2.market) ? 1 : -1)
+
+        return markets;
+    }
+
+    /**
+     * Combine two ExchangeMarket objects and return sorted ExchangeMarkets by market name.
+     * @param originalMarkets ExchangeMarkets to update with newMarkets.
+     * @param newMarkets ExchangeMarkets to check against the originalMarkets.
+     * @returns Sorted combined ExchangeMarkets.
+     */
+    public updateExchangeMarkets(originalMarkets: ExchangeMarket[], newMarkets: ExchangeMarket[]): ExchangeMarket[] {
+        newMarkets.forEach(market => {
+            if (!originalMarkets.includes(market)) {
+                originalMarkets.push(market);
+            }
+        })
+
+        originalMarkets = this.sortByExchangeMarket(originalMarkets);
+
+        return originalMarkets;
     }
 }

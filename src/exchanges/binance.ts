@@ -62,7 +62,7 @@ export class Binance {
                 }
             }
 
-            await this.currencyData.saveCurrencies(this.name);
+            await this.currencyData.saveCurrencies(this.name, this.exchangeMarkets);
 
             return new ExchangeMarkets(this.name, this.exchangeMarkets);
         } catch (error) {

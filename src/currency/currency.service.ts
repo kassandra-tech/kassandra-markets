@@ -11,10 +11,6 @@ var currencyData: CurrencyData = new CurrencyData();
  */
 @Injectable()
 export class CurrencyService extends Base {
-  public constructor() {
-    super();
-  }
-
   /**
    * Get currencies for the requested exchange(s),
    * @param exchanges Exchange(s) to return markets of.

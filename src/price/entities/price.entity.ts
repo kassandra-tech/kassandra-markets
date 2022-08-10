@@ -70,7 +70,7 @@ export class Price {
                 if (this.lowPrice === 0 && this.highPrice === 0) {
                     this.lowPrice = Data.cryptoNumberFormat(trade.price);
                     this.highPrice = Data.cryptoNumberFormat(trade.price);
-                } else if (this.price < this.lowPrice) {
+                } else if (this.price < this.lowPrice || this.lowPrice === 0) {
                     this.lowPrice = this.price;
                 } else if (this.price > this.highPrice) {
                     this.highPrice = this.price;
@@ -97,10 +97,11 @@ export class Price {
         if (price !== undefined) {
             this.price = Data.cryptoNumberFormat(price.price);
 
-            if (price.lowPrice < this.lowPrice) {
-                this.lowPrice = Data.cryptoNumberFormat(price.lowPrice);
+
+            if (price.lowPrice < this.lowPrice && price.lowPrice !== 0) {
+                this.lowPrice = price.lowPrice;
             } else if (price.highPrice > this.highPrice) {
-                this.highPrice = Data.cryptoNumberFormat(price.highPrice);
+                this.highPrice = price.highPrice;
             }
 
             this.buyVolume = this.buyVolume + Data.cryptoNumberFormat(price.buyVolume);
