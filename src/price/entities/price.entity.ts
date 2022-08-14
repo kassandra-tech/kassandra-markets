@@ -65,16 +65,7 @@ export class Price {
     public updateTrade(trade: Trade) {
         if (trade !== undefined) {
             try {
-                this.price = Data.cryptoNumberFormat(trade.price);
-
-                if (this.lowPrice === 0 && this.highPrice === 0) {
-                    this.lowPrice = Data.cryptoNumberFormat(trade.price);
-                    this.highPrice = Data.cryptoNumberFormat(trade.price);
-                } else if (this.price < this.lowPrice || this.lowPrice === 0) {
-                    this.lowPrice = this.price;
-                } else if (this.price > this.highPrice) {
-                    this.highPrice = this.price;
-                }
+                this.updateHighLowPrice(Data.cryptoNumberFormat(trade.price));
 
                 if (trade.isBuyerMaker) {
                     this.buyVolume = this.buyVolume + Data.cryptoNumberFormat(trade.quantity);
@@ -90,23 +81,40 @@ export class Price {
     }
 
     /**
-     * Update the price with additional price information.
+     * Update the price, lowPrice, highPrice, buyVolume, sellVolume, and volume information from the provided price.
      * @param price Update the price record with the given price.
      */
     public updatePrice(price: Price) {
         if (price !== undefined) {
-            this.price = Data.cryptoNumberFormat(price.price);
+            this.updatePriceData(price.price, price.lowPrice, price.highPrice, price.buyVolume, price.sellVolume, price.volume);
+        }
+    }
 
+    /**
+     * Update the price, lowPrice, highPrice, buyVolume, sellVolume, and volume information from the provided data.
+     * @param price Price for the trade.
+     * @param lowPrice Lowest price for the market in the time range.
+     * @param highPrice Highest price for the market in the time range.
+     * @param buyVolume Amount of the currency purchased in the time range.
+     * @param sellVolume Amount of currency sold in the time range.
+     * @param volume Total amount of currency bought and sold.
+     */
+    public updatePriceData(price: number, lowPrice: number, highPrice: number, buyVolume: number, sellVolume: number, volume: number) {
+        this.price = Data.cryptoNumberFormat(price);
 
-            if (price.lowPrice < this.lowPrice && price.lowPrice !== 0) {
-                this.lowPrice = price.lowPrice;
-            } else if (price.highPrice > this.highPrice) {
-                this.highPrice = price.highPrice;
-            }
+        this.updateHighLowPrice(lowPrice);
+        this.updateHighLowPrice(highPrice);
 
-            this.buyVolume = this.buyVolume + Data.cryptoNumberFormat(price.buyVolume);
-            this.sellVolume = this.sellVolume + Data.cryptoNumberFormat(price.sellVolume);
-            this.volume = this.buyVolume + Data.cryptoNumberFormat(this.sellVolume);
+        this.buyVolume = this.buyVolume + Data.cryptoNumberFormat(buyVolume);
+        this.sellVolume = this.sellVolume + Data.cryptoNumberFormat(sellVolume);
+        this.volume = this.buyVolume + this.sellVolume;
+    }
+
+    private updateHighLowPrice(price: number) {
+        if (price < this.lowPrice || this.lowPrice === 0) {
+            this.lowPrice = price;
+        } else if (price > this.highPrice) {
+            this.highPrice = price;
         }
     }
 }

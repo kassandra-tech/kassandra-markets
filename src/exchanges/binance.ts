@@ -105,17 +105,17 @@ export class Binance {
                     this.prices.push(price);
                 }
 
-                if (priceTime.minuteUpdate(1)) {
+                if (priceTime.secondUpdate(30)) {
                     await this.priceData.savePriceRecord(this.name, this.prices);
 
                     this.prices = [];
                 }
 
-                if (priceRecordTime.minuteUpdate(5)) {
-                    var prices: Prices = await this.priceData.getPriceRecord(this.name, 5);
+                if (priceRecordTime.minuteUpdate(1)) {
+                    var prices: Prices = await this.priceData.getPriceRecord(this.name);
 
                     if (prices !== undefined && prices.prices.length > 0) {
-                        await this.marketsData.saveMarketRecord(this.name, this.exchangeMarkets, this.currentPrices, prices);
+                        await this.marketsData.saveMarkets(this.name, this.exchangeMarkets, this.currentPrices, prices);
                     }
                 }
             } catch (error) {

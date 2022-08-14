@@ -1,11 +1,8 @@
 import { Currency } from 'src/currency/entity/currency.entity';
-import { DataDefinitions } from 'src/data/DataDefinitions';
 import { CurrentPrice } from 'src/price/entities/current.price.entity';
 import { Price } from 'src/price/entities/price.entity';
-import { Exchanges } from '../../enums/exchanges.enum';
-import { ExchangeMarket } from './exchange.market.entity';
 
-var Data = new DataDefinitions();
+var Data: Price;
 
 /**
  * Record that contains the name of the exchange with associated exchange markets.
@@ -15,69 +12,83 @@ export class Market {
      * Two currencies being traded.
      * @example BTC-USD
      */
-    currency: Currency;
-    quoteCurrency: string;
-    currencyName: string;
-    rank: number;
-    rating: string;
-    pricePercentage: number;
-    priceLabel: string;
-    price: Price;
-    exchanges: Exchanges[];
-    exchangeMarket: ExchangeMarket
+    public market: string;
+    public currency: string;
+    public currencyName: string;
+    public quoteCurrency: string;
+    public currencyRank: number;
+    public currencyRating: string;
+    public pricePercentage: number;
+    public priceLabel: string;
+    public price: number;
+    public lowPrice: number;
+    public highPrice: number;
+    public buyVolume: number;
+    public sellVolume: number;
+    public volume: number;
 
-    constructor(currency: Currency, quoteCurrency: string, currentPrice: CurrentPrice, price: Price, exchanges: Exchanges[]) {
-        this.currency = currency;
-        this.quoteCurrency = quoteCurrency;
-        this.price = price;
-        this.priceLabel = "";
-        this.pricePercentage = 0.0;
-        this.exchanges = exchanges;
+    constructor(currency: Currency, quoteCurrency: string, currentPrice: CurrentPrice, price: Price) {
+        if (price !== undefined) {
+            Data = price;
+            this.market = price.market;
 
-        this.updatePrice(price);
+            if (currency !== undefined) {
+                this.currency = currency.symbol;
+                this.currencyName = currency.name;
+                this.currencyRank = currency.rank;
+                this.currencyRating = currency.rating;
+            }
 
-        if (currentPrice !== undefined) {
-            this.price.price = Data.cryptoNumberFormat(currentPrice.price);
-        } else if (price !== undefined) {
-            this.price.price = Data.cryptoNumberFormat(price.price);
+            this.quoteCurrency = quoteCurrency;
+
+            if (currentPrice !== undefined) {
+                this.price = currentPrice.price;
+            }
+            this.priceLabel = "";
+            this.pricePercentage = 0;
+
+            this.updatePrice(price);
         }
     }
 
     /**
-     * Update the market price with the given price details.
+     * Update the price, lowPrice, highPrice, buyVolume, sellVolume, and volume, priceLabel, and pricePercentage information from the provided price.
      * @param price Price to update existing record for.
      */
     public updatePrice(price: Price) {
         try {
             if (price !== undefined) {
-                this.price.updatePrice(price);
+                Data.updatePrice(price);
 
-                var currentPrice = Data.cryptoNumberFormat(price.price);
-                var lowPrice = Data.cryptoNumberFormat(price.lowPrice);
-                var highPrice = Data.cryptoNumberFormat(price.highPrice);
-                var avgPrice = highPrice + lowPrice;
-                var priceGap = (highPrice - lowPrice) / 5;
-                var lowPercentage = ((currentPrice / lowPrice) - 1) * 100;
-                var highPercentage = (currentPrice / highPrice) * 100;
+                this.lowPrice = Data.lowPrice;
+                this.highPrice = Data.highPrice;
+                this.buyVolume = Data.buyVolume;
+                this.sellVolume = Data.sellVolume;
+                this.volume = Data.volume;
 
-                if (lowPrice === highPrice) {
+                var avgPrice = this.highPrice + this.lowPrice;
+                var priceGap = (this.highPrice - this.lowPrice) / 5;
+                var lowPercentage = ((this.price / this.lowPrice) - 1) * 100;
+                var highPercentage = (this.price / this.highPrice) * 100;
+
+                if (this.lowPrice === this.highPrice) {
                     this.priceLabel = "Hold";
                     this.pricePercentage = 0.0;
                 }
-                else if (currentPrice <= lowPrice + priceGap) {
+                else if (this.price <= this.lowPrice + priceGap) {
                     this.priceLabel = "Strong Buy";
                     this.pricePercentage = lowPercentage;
-                } else if (currentPrice <= lowPrice + (priceGap * 2)) {
+                } else if (this.price <= this.lowPrice + (priceGap * 2)) {
                     this.priceLabel = "Buy";
                     this.pricePercentage = lowPercentage;
-                } else if (currentPrice <= lowPrice + (priceGap * 3)) {
+                } else if (this.price <= this.lowPrice + (priceGap * 3)) {
                     this.priceLabel = "Hold";
-                    if (currentPrice < avgPrice) {
+                    if (this.price < avgPrice) {
                         this.pricePercentage = lowPercentage;
                     } else {
                         this.pricePercentage = highPercentage;
                     }
-                } else if (currentPrice <= lowPrice + (priceGap * 4)) {
+                } else if (this.price <= this.lowPrice + (priceGap * 4)) {
                     this.priceLabel = "Sell";
                     this.pricePercentage = highPercentage;
                 } else {
@@ -87,6 +98,16 @@ export class Market {
             }
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    /**
+     * Update the market price from another market.
+     * @param market Market to update exiting market prices from.
+     */
+    public updateMarketPrice(market: Market) {
+        if (market !== undefined) {
+            Data.updatePriceData(market.price, market.lowPrice, market.highPrice, market.buyVolume, market.sellVolume, market.volume);
         }
     }
 }

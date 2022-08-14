@@ -40,36 +40,36 @@ export class MarketsData extends KassandraData {
    * @param currentPrices  Current exchange market prices.
    * @param prices Exchange historical prices.
    */
-  async saveMarketRecord(exchange: Exchanges, exchangeMarkets: ExchangeMarket[], currentPrices: CurrentPrice[], prices: Prices) {
+  public async saveMarkets(exchange: Exchanges, exchangeMarkets: ExchangeMarket[], currentPrices: CurrentPrice[], prices: Prices) {
     try {
-      var list: Market[] = [];
+      var markets: Market[] = [];
 
       await this.Data.saveCurrencies(exchange, exchangeMarkets);
 
-      prices.prices.forEach(price => {
-        var market = list.find(market => market.price.market === price.market);
+      exchangeMarkets.forEach(market => {
+        var symbol = market.market;
 
-        if (market !== undefined) {
-          var price = prices.prices.find(priceRecord => priceRecord.market === price.market);
-          if (price !== undefined) {
-            market.updatePrice(price);
+        var currentPrice = currentPrices.find(currentPrice => currentPrice.market === symbol);
+        var price = prices.prices.find(price => price.market === symbol);
+        var currency = this.Data.currencies.find(currency => currency.symbol === market.currency);
+
+        var foundMarket = markets.find(market => market.market == symbol);
+
+        if (foundMarket !== undefined) {
+          if (currentPrice !== undefined && price !== undefined) {
+            foundMarket.updatePrice(price);
+            foundMarket.price = currentPrice.price;
           }
         } else {
-          var exchangeMarket = exchangeMarkets.find(exchangeMarket => exchangeMarket.market === price.market);
-          var currentPrice = currentPrices.find(currentPrice => currentPrice.market === price.market);
-          var priceRecord = prices.prices.find(priceRecord => priceRecord.market === price.market);
-          var currency = this.Data.currencies.find(currency => currency.symbol == exchangeMarket.currency);
+          var newMarket = new Market(currency, market.quoteCurrency, currentPrice, price);
 
-          if (exchangeMarket !== undefined && currentPrice !== undefined && priceRecord !== undefined && currency != undefined) {
-            var marketRecord = new Market(currency, exchangeMarket.quoteCurrency, currentPrice, priceRecord, [exchange]);
-
-            list.push(marketRecord);
+          if (newMarket.market !== undefined) {
+            markets.push(newMarket);
           }
-
         }
       })
 
-      await this.saveKassandraData(this.Definitions.MarketRecordString, this.Definitions.marketsString, list);
+      await this.saveKassandraData(this.Definitions.MarketRecordString, this.Definitions.marketsString, markets, exchange);
     } catch (error) {
       console.log(error);
     }
