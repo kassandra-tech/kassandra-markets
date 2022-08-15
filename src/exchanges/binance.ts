@@ -46,20 +46,14 @@ export class Binance {
      */
     public async getMarkets(): Promise<ExchangeMarkets> {
         try {
-            var record = await this.marketsData.getExchangeMarketRecord(this.name);
+            const exchangeInfo = await binance.exchangeInfo();
 
-            if (record !== undefined) {
-                this.exchangeMarkets = record.markets;
-            } else {
-                const exchangeInfo = await binance.exchangeInfo();
-
-                var markets: BinanceMarket[] = exchangeInfo.symbols;
-                if (markets !== undefined) {
-                    markets.forEach(market => {
-                        var exchangeMarket = new ExchangeMarket(market.symbol, market.baseAsset, market.quoteAsset);
-                        this.exchangeMarkets.push(exchangeMarket);
-                    })
-                }
+            var markets: BinanceMarket[] = exchangeInfo.symbols;
+            if (markets !== undefined) {
+                markets.forEach(market => {
+                    var exchangeMarket = new ExchangeMarket(market.symbol, market.baseAsset, market.quoteAsset);
+                    this.exchangeMarkets.push(exchangeMarket);
+                })
             }
 
             await this.currencyData.saveCurrencies(this.name, this.exchangeMarkets);

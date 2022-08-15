@@ -2,8 +2,6 @@ import { Currency } from 'src/currency/entity/currency.entity';
 import { CurrentPrice } from 'src/price/entities/current.price.entity';
 import { Price } from 'src/price/entities/price.entity';
 
-var Data: Price;
-
 /**
  * Record that contains the name of the exchange with associated exchange markets.
  */
@@ -27,9 +25,8 @@ export class Market {
     public sellVolume: number;
     public volume: number;
 
-    constructor(currency: Currency, quoteCurrency: string, currentPrice: CurrentPrice, price: Price) {
+    constructor(price: Price, currency: Currency = undefined, quoteCurrency: string = "", currentPrice: CurrentPrice = undefined) {
         if (price !== undefined) {
-            Data = price;
             this.market = price.market;
 
             if (currency !== undefined) {
@@ -44,10 +41,11 @@ export class Market {
             if (currentPrice !== undefined) {
                 this.price = currentPrice.price;
             }
-            this.priceLabel = "";
-            this.pricePercentage = 0;
 
             this.updatePrice(price);
+
+            this.priceLabel = "";
+            this.pricePercentage = 0;
         }
     }
 
@@ -58,13 +56,13 @@ export class Market {
     public updatePrice(price: Price) {
         try {
             if (price !== undefined) {
-                Data.updatePrice(price);
+                price.updatePriceData(this.price, this.lowPrice, this.highPrice, this.buyVolume, this.sellVolume, this.volume);
 
-                this.lowPrice = Data.lowPrice;
-                this.highPrice = Data.highPrice;
-                this.buyVolume = Data.buyVolume;
-                this.sellVolume = Data.sellVolume;
-                this.volume = Data.volume;
+                this.lowPrice = price.lowPrice;
+                this.highPrice = price.highPrice;
+                this.buyVolume = price.buyVolume;
+                this.sellVolume = price.sellVolume;
+                this.volume = price.volume;
 
                 var avgPrice = this.highPrice + this.lowPrice;
                 var priceGap = (this.highPrice - this.lowPrice) / 5;
@@ -98,16 +96,6 @@ export class Market {
             }
         } catch (error) {
             console.log(error);
-        }
-    }
-
-    /**
-     * Update the market price from another market.
-     * @param market Market to update exiting market prices from.
-     */
-    public updateMarketPrice(market: Market) {
-        if (market !== undefined) {
-            Data.updatePriceData(market.price, market.lowPrice, market.highPrice, market.buyVolume, market.sellVolume, market.volume);
         }
     }
 }

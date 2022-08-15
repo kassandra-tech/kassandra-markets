@@ -6,8 +6,8 @@ import {
 } from '@nestjs/swagger';
 import { Exchanges } from '../enums/exchanges.enum';
 import { MarketsService } from './markets.service';
+import { MarketsRecord } from './entities/markets.record.entity';
 import { ExchangeMarkets } from './entities/exchange.markets.entity';
-import { Market } from './entities/market.entity';
 
 /**
  * Provides market API routes.
@@ -41,11 +41,11 @@ export class MarketsController {
   }
 
   /**
-   * Get supported market records for the requested exchange(s).
+   * Get supported markets for the requested exchange(s).
    * @param exchanges Exchange(s) to return markets of.
-   * @returns Market records for the requested exchange(s).
+   * @returns Markets for the requested exchange(s).
    */
-  @Get('market-records')
+  @Get('markets')
   @ApiQuery({
     name: 'exchanges',
     description: "Exchange(s) to return information from.",
@@ -56,10 +56,10 @@ export class MarketsController {
   @ApiResponse({
     status: 200,
     description: 'Market(s) with supported markets per exchange.',
-    type: Market,
+    type: MarketsRecord,
     isArray: true
   })
-  async getExchangeRecord(@Query('exchanges') exchanges): Promise<Market[]> {
+  async getMarkets(@Query('exchanges') exchanges): Promise<MarketsRecord> {
     return await this.marketsService.getMarketRecords(exchanges);
   }
 }

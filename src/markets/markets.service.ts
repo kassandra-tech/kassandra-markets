@@ -4,7 +4,9 @@ import { Coinbase } from 'src/exchanges/coinbase';
 import { ExchangeMarkets } from './entities/exchange.markets.entity';
 import { Exchanges } from '../enums/exchanges.enum';
 import { Market } from './entities/market.entity';
+import { Markets } from './entities/markets.entity';
 import { KassandraData } from 'src/data/KassandraData';
+import { MarketsRecord } from './entities/markets.record.entity';
 
 /**
  * Supported market requests.
@@ -54,28 +56,37 @@ export class MarketsService extends KassandraData {
    * @param exchanges Exchange(s) to return markets of.
    * @returns Markets records for the requested exchange(s).
    */
-  public async getMarketRecords(exchanges: Exchanges[]): Promise<Market[]> {
+  public async getMarketRecords(exchanges: Exchanges[]): Promise<MarketsRecord> {
+    var marketsRecord: MarketsRecord;
     var exchangeList: Exchanges[] = [];
 
     try {
       exchangeList = this.getExchanges(exchanges);
-      var marketRecords: Market[] = [];
 
-      var records: Market[] = await this.getKassandraObjects(this.Definitions.MarketRecordString, 5);
-      
+      var records = await this.getKassandraObjects(this.Definitions.MarketsString, 30);
+
       if (records !== undefined) {
-        records.forEach(record => {
-          exchangeList.forEach(exchange => {
-            if (exchangeList.includes(exchange) && !marketRecords.includes(record)) {
-              marketRecords.push(record);
+        records.forEach(record => { // Database row
+          var exchange = record.get(this.Definitions.exchangeString)
+          var markets: Market[] = record.get(this.Definitions.marketsString);
+
+          if (exchangeList.includes(exchange)) {
+            if (markets !== undefined) {
+              var newMarkets = new Markets(exchange, markets);
+
+              if (marketsRecord !== undefined) {
+                marketsRecord.updateMarkets(newMarkets);         
+              } else {
+                marketsRecord = new MarketsRecord(newMarkets);
+              }
             }
-          })
+          }
         })
       }
 
-      return marketRecords;
-    } catch (error) {
-      console.log(error);
+      return marketsRecord;
+      } catch (error) {
+        console.log(error);
+      }
     }
-  }
 }

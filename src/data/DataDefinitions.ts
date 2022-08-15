@@ -6,44 +6,82 @@ export class DataDefinitions {
      * Kassandra objects
      */
 
+    /**
+     * CurrencyInformation
+     */
     CurrencyInformationString: string;
+
+    /**
+     * Currencies
+     */
     CurrenciesString: string;
-    ExchangeMarketString: string;
+
+    /**
+     * Markets
+     */
     MarketsString: string;
+
+    /**
+     * Price
+     */
     PriceString: string;
+
+    /**
+     * Prices
+     */
     PricesString: string;
 
     /**
      * Kassandra object properties
      */
 
+    /**
+     * exchange
+     */
+    exchangeString: string;
+
+    /**
+     * currencies
+     */
     currenciesString: string;
+
+    /**
+     * markets
+     */
     marketsString: string;
-    MarketRecordString: string;
+
+    /**
+     * prices
+     */
     pricesString: string;
 
     /**
      * Moralis properties
      */
+
+    /**
+     * createdAt
+     */
     createdAtString: string;
-    exchangeString: string;
+
+    /**
+     * updatedAt
+     */
     updatedAtString: string;
 
     constructor() {
         this.CurrencyInformationString = "CurrencyInformation";
         this.CurrenciesString = "Currencies";
-        this.ExchangeMarketString = "ExchangeMarket";
         this.MarketsString = "Markets";
-        this.MarketRecordString = "MarketRecord";
         this.PriceString = "Price";
         this.PricesString = "Prices";
 
+        this.exchangeString = "exchange";
         this.currenciesString = "currencies";
         this.marketsString = "markets";
         this.pricesString = "prices";
 
         this.createdAtString = "createdAt";
-        this.exchangeString = "exchange";
         this.updatedAtString = "updatedAt";
     }
 
@@ -53,9 +91,13 @@ export class DataDefinitions {
      * @returns formatted number with 8 decimal places.
      */
     public cryptoNumberFormat(amount: number): number {
-        if (amount === null) {
-            amount = 0;
+        try {
+            if (amount === null || amount === undefined) {
+                amount = 0;
+            }
+            return parseFloat(parseFloat(amount.toString()).toFixed(8));
+        } catch (error) {
+            console.log(error);
         }
-        return parseFloat(parseFloat(amount.toString()).toFixed(8));
     }
 }

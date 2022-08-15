@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ExchangeMarkets } from './entities/exchange.markets.entity';
 import { Exchanges } from '../enums/exchanges.enum';
 import { ExchangeMarket } from './entities/exchange.market.entity';
 import { Market } from './entities/market.entity';
@@ -7,6 +6,8 @@ import { CurrentPrice } from 'src/price/entities/current.price.entity';
 import { Prices } from 'src/price/entities/prices.entity';
 import { KassandraData } from 'src/data/KassandraData';
 import { CurrencyData } from 'src/currency/currency.data';
+import { MarketsRecord } from './entities/markets.record.entity';
+import { Markets } from './entities/markets.entity';
 
 /**
  * Interact with the Kassandra datastore to retrieve and store market data.
@@ -14,24 +15,44 @@ import { CurrencyData } from 'src/currency/currency.data';
 @Injectable()
 export class MarketsData extends KassandraData {
   private Data: CurrencyData = new CurrencyData();
-
   /**
-   * Get ExchangeMarkets record in the Kassandra datastore for the requested exchange.
-   * @param exchange Exchange to get markets for.
-   * @returns ExchangeMarkets record with all supported markets.
+   * Get market records for the given exchanges.
+   * @param exchanges Exchange(s) to return markets of.
+   * @returns Markets records for the requested exchange(s).
    */
-  public async getExchangeMarketRecord(exchange: Exchanges): Promise<ExchangeMarkets> {
-    return await this.getKassandraData(this.Definitions.ExchangeMarketString, this.Definitions.marketsString, exchange);
-  }
+   public async getMarketRecords(exchanges: Exchanges[]): Promise<MarketsRecord> {
+    var marketsRecord: MarketsRecord;
+    var exchangeList: Exchanges[] = [];
 
-  /**
-   * Save ExchangeMarkets record in the Kassandra datastore.
-   * @param exchange Exchange to save markets for.
-   * @param markets ExchangeMarkets record with all supported markets.
-   */
-  public async saveExchangeMarkets(exchange: Exchanges, markets: ExchangeMarkets) {
-    await this.saveKassandraData(this.Definitions.ExchangeMarketString, this.Definitions.marketsString, markets, exchange);
-  }
+    try {
+      exchangeList = this.getExchanges(exchanges);
+
+      var records = await this.getKassandraObjects(this.Definitions.MarketsString, 30);
+
+      if (records !== undefined) {
+        records.forEach(record => { // Database row
+          var exchange = record.get(this.Definitions.exchangeString)
+          var markets: Market[] = record.get(this.Definitions.marketsString);
+
+          if (exchangeList.includes(exchange)) {
+            if (markets !== undefined) {
+              var newMarkets = new Markets(exchange, markets);
+
+              if (marketsRecord !== undefined) {
+                marketsRecord.updateMarkets(newMarkets);         
+              } else {
+                marketsRecord = new MarketsRecord(newMarkets);
+              }
+            }
+          }
+        })
+      }
+
+      return marketsRecord;
+      } catch (error) {
+        console.log(error);
+      }
+    }
 
   /**
    * Save a market record.
@@ -53,23 +74,14 @@ export class MarketsData extends KassandraData {
         var price = prices.prices.find(price => price.market === symbol);
         var currency = this.Data.currencies.find(currency => currency.symbol === market.currency);
 
-        var foundMarket = markets.find(market => market.market == symbol);
+        var newMarket = new Market(price, currency, market.quoteCurrency, currentPrice);
 
-        if (foundMarket !== undefined) {
-          if (currentPrice !== undefined && price !== undefined) {
-            foundMarket.updatePrice(price);
-            foundMarket.price = currentPrice.price;
-          }
-        } else {
-          var newMarket = new Market(currency, market.quoteCurrency, currentPrice, price);
-
-          if (newMarket.market !== undefined) {
-            markets.push(newMarket);
-          }
+        if (newMarket.market !== undefined) {
+          markets.push(newMarket);
         }
       })
 
-      await this.saveKassandraData(this.Definitions.MarketRecordString, this.Definitions.marketsString, markets, exchange);
+      await this.saveKassandraData(this.Definitions.MarketsString, this.Definitions.marketsString, markets, exchange);
     } catch (error) {
       console.log(error);
     }

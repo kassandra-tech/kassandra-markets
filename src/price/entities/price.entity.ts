@@ -105,8 +105,8 @@ export class Price {
         this.updateHighLowPrice(lowPrice);
         this.updateHighLowPrice(highPrice);
 
-        this.buyVolume = this.buyVolume + Data.cryptoNumberFormat(buyVolume);
-        this.sellVolume = this.sellVolume + Data.cryptoNumberFormat(sellVolume);
+        this.buyVolume = Data.cryptoNumberFormat(this.buyVolume) + Data.cryptoNumberFormat(buyVolume);
+        this.sellVolume = Data.cryptoNumberFormat(this.sellVolume) + Data.cryptoNumberFormat(sellVolume);
         this.volume = this.buyVolume + this.sellVolume;
     }
 

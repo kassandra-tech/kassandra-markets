@@ -32,19 +32,13 @@ export class Coinbase {
      */
     public async getMarkets(): Promise<ExchangeMarkets> {
         try {
-            var record = await this.marketsData.getExchangeMarketRecord(this.name);
+            const markets: CoinbaseMarket[] = await coinbase.rest.product.getProducts();
 
-            if (record !== undefined) {
-                this.exchangeMarkets = record.markets;
-            } else {
-                const markets: CoinbaseMarket[] = await coinbase.rest.product.getProducts();
-
-                if (markets !== undefined) {
-                    markets.forEach(market => {
-                        var exchangeMarket = new ExchangeMarket(market.display_name, market.base_currency, market.quote_currency);
-                        this.exchangeMarkets.push(exchangeMarket);
-                    });
-                }
+            if (markets !== undefined) {
+                markets.forEach(market => {
+                    var exchangeMarket = new ExchangeMarket(market.display_name, market.base_currency, market.quote_currency);
+                    this.exchangeMarkets.push(exchangeMarket);
+                });
             }
 
             await this.currencyData.saveCurrencies(this.name, this.exchangeMarkets);

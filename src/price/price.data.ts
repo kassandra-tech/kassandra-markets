@@ -90,10 +90,10 @@ export class PriceData extends KassandraData {
                         var price = prices.find(price => price.market === priceRecord.market);
 
                         if (price !== undefined) {
-                            price.updatePrice(priceRecord);
+                            price.updatePriceData(priceRecord.price, priceRecord.lowPrice, priceRecord.highPrice, priceRecord.buyVolume, priceRecord.sellVolume, priceRecord.volume);
                         } else {
                             var newPrice = new Price(priceRecord.market);
-                            newPrice.updatePrice(priceRecord);
+                            newPrice.updatePriceData(priceRecord.price, priceRecord.lowPrice, priceRecord.highPrice, priceRecord.buyVolume, priceRecord.sellVolume, priceRecord.volume);
                             prices.push(newPrice);
                         }
                     })
