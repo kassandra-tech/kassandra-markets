@@ -56,7 +56,7 @@ export class MarketsService extends KassandraData {
    * @param exchanges Exchange(s) to return markets of.
    * @returns Markets records for the requested exchange(s).
    */
-  public async getMarketRecords(exchanges: Exchanges[]): Promise<MarketsRecord> {
+  public async getMarketRecords(exchanges: Exchanges[]): Promise<MarketsRecord[]> {
     return await this.marketData.getMarketRecords(exchanges);
   }
 }

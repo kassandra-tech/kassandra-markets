@@ -1,8 +1,6 @@
-import { Base } from 'src/data/Base';
 import { Price } from 'src/price/entities/price.entity';
 
 var priceRecord: Price;
-var helpers: Base = new Base();
 
 /**
  * Record that contains the name of the exchange with associated exchange markets.

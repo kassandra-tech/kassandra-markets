@@ -59,7 +59,7 @@ export class MarketsController {
     type: MarketsRecord,
     isArray: true
   })
-  async getMarkets(@Query('exchanges') exchanges): Promise<MarketsRecord> {
+  async getMarkets(@Query('exchanges') exchanges): Promise<MarketsRecord[]> {
     return await this.marketsService.getMarketRecords(exchanges);
   }
 }

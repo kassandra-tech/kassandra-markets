@@ -17,8 +17,8 @@ export class MarketsData extends CurrencyData {
    * @param exchanges Exchange(s) to return markets of.
    * @returns Markets records for the requested exchange(s).
    */
-   public async getMarketRecords(exchanges: Exchanges[]): Promise<MarketsRecord> {
-    var marketsRecord: MarketsRecord;
+  public async getMarketRecords(exchanges: Exchanges[]): Promise<MarketsRecord[]> {
+    var marketsRecord: MarketsRecord[] = [];
     var exchangeList: Exchanges[] = [];
 
     try {
@@ -33,23 +33,26 @@ export class MarketsData extends CurrencyData {
 
           if (exchangeList.includes(exchange)) {
             if (markets !== undefined) {
-              var newMarkets = new Markets(exchange, markets);
+              markets.forEach(market => {
 
-              if (marketsRecord !== undefined) {
-                marketsRecord.updateMarkets(newMarkets);         
-              } else {
-                marketsRecord = new MarketsRecord(newMarkets);
-              }
+                var record = marketsRecord.find(record => record.market.market === market.market);
+
+                if (record !== undefined) {
+                  record.updateMarkets(exchange, market);
+                } else {
+                  marketsRecord.push(new MarketsRecord(exchange, market));
+                }
+              })
             }
           }
         })
       }
 
       return marketsRecord;
-      } catch (error) {
-        console.log(error);
-      }
+    } catch (error) {
+      console.log(error);
     }
+  }
 
   /**
    * Save a market record.

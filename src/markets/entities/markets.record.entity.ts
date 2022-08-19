@@ -1,4 +1,5 @@
 
+import { Price } from 'src/price/entities/price.entity';
 import { Exchanges } from '../../enums/exchanges.enum';
 import { Market } from './market.entity';
 import { Markets } from './markets.entity';
@@ -16,52 +17,49 @@ export class MarketsRecord {
     /**
      * Combined markets for requested exchanges.
      */
-    markets: Market[];
+    market: Market;
 
     /**
      * Exchange specific markets.
      */
     exchangeMarkets: Markets[];
 
-    public constructor(markets: Markets) {
+    public constructor(exchange: Exchanges, market: Market) {
         this.exchanges = [];
-        this.markets = [];
         this.exchangeMarkets = [];
 
-        this.updateMarkets(markets);
+        this.updateMarkets(exchange, market);
     }
 
     /**
      * Update the markets data.
-     * @param markets Markets data to update.
+     * @param market Markets data to update.
      */
-    public updateMarkets(markets: Markets) {
+    public updateMarkets(exchange: Exchanges, market: Market) {
         try {
-            if (markets !== null) {
-                this.updateExchange(markets.exchange);
+            if (market !== null && market !== undefined) {
+                this.updateExchange(exchange);
 
-                var exchangeMarkets = this.exchangeMarkets.find(exchangeMarkets => exchangeMarkets.exchange === markets.exchange);
+                var exchangeMarket = this.exchangeMarkets.find(exchangeMarkets => exchangeMarkets.exchange === exchange);
+                var price = new Price(market.market).updatePriceData(market.price, market.lowPrice, market.highPrice, market.buyVolume, market.sellVolume);
 
-                if (exchangeMarkets !== undefined) {
-                    markets.markets.forEach(market => {
-                        var foundMarket = exchangeMarkets.markets.find(marketSearch => marketSearch.market === market.market); // Does this.exchangeMarkets contain the market?
+                if (exchangeMarket !== undefined) {
+                    var foundMarket = exchangeMarket.markets.find(marketSearch => marketSearch.market === market.market); // Does this.exchangeMarkets contain the market?
 
-                        if (foundMarket !== undefined) {
-                            foundMarket.updatePrice(market.price, market.lowPrice, market.highPrice, market.buyVolume, market.sellVolume);
-                        } else {
-                            exchangeMarkets.markets.push(market);
-                        }
-
-                        var foundMarket = this.markets.find(marketSearch => marketSearch.market === market.market);
-
-                        if (foundMarket !== undefined) {
-                            foundMarket.updatePrice(market.price, market.lowPrice, market.highPrice, market.buyVolume, market.sellVolume);
-                        } else {
-                            this.markets.push(market);
-                        }
-                    });
+                    if (foundMarket !== undefined) {
+                        foundMarket = new Market(price);
+                        foundMarket.updatePrice(market.price, market.lowPrice, market.highPrice, market.buyVolume, market.sellVolume);
+                    } else {
+                        exchangeMarket.markets.push(market);
+                    }
                 } else {
-                    this.exchangeMarkets.push(new Markets(markets.exchange, markets.markets));
+                    this.exchangeMarkets.push(new Markets(exchange, [market]));
+                }
+
+                if (this.market !== undefined) {
+                    this.market.updatePrice(market.price, market.lowPrice, market.highPrice, market.buyVolume, market.sellVolume);
+                } else {
+                    this.market = new Market(price);
                 }
             }
         } catch (error) {
