@@ -1,5 +1,4 @@
 
-import { Price } from 'src/price/entities/price.entity';
 import { Exchanges } from '../../enums/exchanges.enum';
 import { Market } from './market.entity';
 import { Markets } from './markets.entity';
@@ -48,7 +47,7 @@ export class MarketsRecord {
                         var foundMarket = exchangeMarkets.markets.find(marketSearch => marketSearch.market === market.market); // Does this.exchangeMarkets contain the market?
 
                         if (foundMarket !== undefined) {
-                            foundMarket = this.getUpdatedMarketPrice(market);
+                            foundMarket.updatePrice(market.price, market.lowPrice, market.highPrice, market.buyVolume, market.sellVolume);
                         } else {
                             exchangeMarkets.markets.push(market);
                         }
@@ -56,14 +55,13 @@ export class MarketsRecord {
                         var foundMarket = this.markets.find(marketSearch => marketSearch.market === market.market);
 
                         if (foundMarket !== undefined) {
-                            foundMarket = this.getUpdatedMarketPrice(market);
+                            foundMarket.updatePrice(market.price, market.lowPrice, market.highPrice, market.buyVolume, market.sellVolume);
                         } else {
                             this.markets.push(market);
                         }
                     });
                 } else {
                     this.exchangeMarkets.push(new Markets(markets.exchange, markets.markets));
-                    //this.markets = markets.markets;
                 }
             }
         } catch (error) {
@@ -75,15 +73,5 @@ export class MarketsRecord {
         if (!this.exchanges.includes(exchange)) {
             this.exchanges.push(exchange);
         }
-    }
-
-    private getUpdatedMarketPrice(market: Market): Market {
-        var newPrice = new Price(market.market);
-        newPrice.updatePriceData(market.price, market.lowPrice, market.highPrice, market.buyVolume, market.sellVolume, market.volume);
-
-        var newMarket = new Market(newPrice)
-        newMarket.updatePrice(newPrice);
-
-        return newMarket;
     }
 }

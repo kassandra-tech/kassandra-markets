@@ -8,7 +8,6 @@ import { CurrentPrice } from "src/price/entities/current.price.entity";
 import { Price } from "src/price/entities/price.entity";
 import { Prices } from "src/price/entities/prices.entity";
 import { TimeHelpers } from "src/data/TimeHelpers";
-import { CurrencyData } from "src/currency/currency.data";
 
 const BinanceInterface = require('binance-api-node');
 const binance = BinanceInterface.default({
@@ -21,7 +20,6 @@ const binance = BinanceInterface.default({
  */
 export class Binance {
     public name: Exchanges;
-    public currencyData: CurrencyData;
     public marketsData: MarketsData;
     public priceData: PriceData;
     private exchangeMarkets: ExchangeMarket[];
@@ -30,7 +28,6 @@ export class Binance {
 
     constructor() {
         this.name = Exchanges.Binance;
-        this.currencyData = new CurrencyData();
         this.marketsData = new MarketsData();
         this.priceData = new PriceData();
         this.exchangeMarkets = [];
@@ -55,8 +52,6 @@ export class Binance {
                     this.exchangeMarkets.push(exchangeMarket);
                 })
             }
-
-            await this.currencyData.saveCurrencies(this.name, this.exchangeMarkets);
 
             return new ExchangeMarkets(this.name, this.exchangeMarkets);
         } catch (error) {
@@ -95,7 +90,7 @@ export class Binance {
                 if (price !== undefined) {
                     price.updateTrade(trade);
                 } else {
-                    var price = new Price(currentPrice.market, trade);
+                    var price = new Price(currentPrice.market).updateTrade(trade);
                     this.prices.push(price);
                 }
 
@@ -106,10 +101,10 @@ export class Binance {
                 }
 
                 if (priceRecordTime.minuteUpdate(1)) {
-                    var prices: Prices = await this.priceData.getPriceRecord(this.name);
+                    var prices: Prices = await this.priceData.getPriceRecord(this.name, 1);
 
                     if (prices !== undefined && prices.prices.length > 0) {
-                        await this.marketsData.saveMarkets(this.name, this.exchangeMarkets, this.currentPrices, prices);
+                        await this.marketsData.saveMarkets(this.name, this.exchangeMarkets, prices);
                     }
                 }
             } catch (error) {

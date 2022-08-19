@@ -9,27 +9,27 @@ export class DataDefinitions {
     /**
      * CurrencyInformation
      */
-    CurrencyInformationString: string;
+    public CurrencyInformationString: string = "CurrencyInformation";
 
     /**
      * Currencies
      */
-    CurrenciesString: string;
+    public CurrenciesString: string = "Currencies";
 
     /**
      * Markets
      */
-    MarketsString: string;
+    public MarketsString: string= "Markets";
 
     /**
      * Price
      */
-    PriceString: string;
+    public PriceString: string= "Price";
 
     /**
      * Prices
      */
-    PricesString: string;
+    public PricesString: string = "Prices";
 
     /**
      * Kassandra object properties
@@ -38,22 +38,22 @@ export class DataDefinitions {
     /**
      * exchange
      */
-    exchangeString: string;
+    public exchangeString: string = "exchange";
 
     /**
      * currencies
      */
-    currenciesString: string;
+    public currenciesString: string = "currencies";
 
     /**
      * markets
      */
-    marketsString: string;
+    public marketsString: string = "markets";
 
     /**
      * prices
      */
-    pricesString: string;
+    public pricesString: string = "prices";
 
     /**
      * Moralis properties
@@ -62,28 +62,12 @@ export class DataDefinitions {
     /**
      * createdAt
      */
-    createdAtString: string;
+    public createdAtString: string = "createdAt";
 
     /**
      * updatedAt
      */
-    updatedAtString: string;
-
-    constructor() {
-        this.CurrencyInformationString = "CurrencyInformation";
-        this.CurrenciesString = "Currencies";
-        this.MarketsString = "Markets";
-        this.PriceString = "Price";
-        this.PricesString = "Prices";
-
-        this.exchangeString = "exchange";
-        this.currenciesString = "currencies";
-        this.marketsString = "markets";
-        this.pricesString = "prices";
-
-        this.createdAtString = "createdAt";
-        this.updatedAtString = "updatedAt";
-    }
+    public updatedAtString: string = "updatedAt";
 
     /**
      * Format numbers with 8 decimal places.

@@ -6,7 +6,6 @@ import { DataDefinitions } from "./DataDefinitions";
  * Base class when interfacing with the Kassandra datastore.
  */
 export class Base {
-
     public Definitions = new DataDefinitions();
 
     /**
@@ -59,5 +58,19 @@ export class Base {
         originalMarkets = this.sortByExchangeMarket(originalMarkets);
 
         return originalMarkets;
+    }
+
+    /**
+     * Get the currency or quote currency from the market.
+     * @param market Market symbol containing 'currency'-'quote currency'. 
+     * @param isCurrency When isCurrency is true, the currency will be returned, when false, the quote currency will be returned.
+     * @returns Requested currency from the given market.
+     */
+    public getCurrencyFromMarket(market: string, isCurrency: boolean = true) {
+        const splitChar = '-';
+
+        if (market != "" && market.includes(splitChar)) {
+            return isCurrency ? market.split(splitChar)[0] : market.split(splitChar)[1];
+        }
     }
 }

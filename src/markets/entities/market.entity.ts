@@ -1,6 +1,8 @@
-import { Currency } from 'src/currency/entity/currency.entity';
-import { CurrentPrice } from 'src/price/entities/current.price.entity';
+import { Base } from 'src/data/Base';
 import { Price } from 'src/price/entities/price.entity';
+
+var priceRecord: Price;
+var helpers: Base = new Base();
 
 /**
  * Record that contains the name of the exchange with associated exchange markets.
@@ -10,60 +12,69 @@ export class Market {
      * Two currencies being traded.
      * @example BTC-USD
      */
-    public market: string;
-    public currency: string;
-    public currencyName: string;
-    public quoteCurrency: string;
-    public currencyRank: number;
-    public currencyRating: string;
-    public pricePercentage: number;
-    public priceLabel: string;
-    public price: number;
-    public lowPrice: number;
-    public highPrice: number;
-    public buyVolume: number;
-    public sellVolume: number;
-    public volume: number;
+    public market: string = "";
+    public pricePercentage: number = 0;
+    public priceLabel: string = "Hold";
+    public price: number = 0;
+    public lowPrice: number = 0;
+    public highPrice: number = 0;
+    public buyVolume: number = 0;
+    public sellVolume: number = 0;
+    public volume: number = 0;
 
-    constructor(price: Price, currency: Currency = undefined, quoteCurrency: string = "", currentPrice: CurrentPrice = undefined) {
+    constructor(price: Price) {
+
         if (price !== undefined) {
             this.market = price.market;
+            priceRecord = price;
 
-            if (currency !== undefined) {
-                this.currency = currency.symbol;
-                this.currencyName = currency.name;
-                this.currencyRank = currency.rank;
-                this.currencyRating = currency.rating;
-            }
-
-            this.quoteCurrency = quoteCurrency;
-
-            if (currentPrice !== undefined) {
-                this.price = currentPrice.price;
-            }
-
-            this.updatePrice(price);
-
-            this.priceLabel = "";
-            this.pricePercentage = 0;
+            this.updatePrice(price.price, price.lowPrice, price.highPrice, price.buyVolume, price.sellVolume);
         }
+    }
+
+    /**
+     * Update the record price information.
+     * @param price Current market price.
+     * @param lowPrice Lowest market price in the time frame.
+     * @param highPrice Highest market price in the time frame.
+     * @param buyVolume Volume for buying the market currency.
+     * @param sellVolume Volume for selling the market currency.
+     * @returns Market update with the given price information.
+     */
+    public updatePrice(price: number, lowPrice: number, highPrice: number, buyVolume: number, sellVolume: number): Market {
+        if (priceRecord !== undefined) {
+            priceRecord.updatePriceData(price, lowPrice, highPrice, buyVolume, sellVolume);
+        } else {
+            priceRecord = new Price(this.market).updatePriceData(price, lowPrice, highPrice, buyVolume, sellVolume);
+        }
+
+        this.price = priceRecord.price;
+        this.lowPrice = priceRecord.lowPrice;
+        this.highPrice = priceRecord.highPrice;
+        this.buyVolume = priceRecord.buyVolume;
+        this.sellVolume = priceRecord.sellVolume;
+        this.volume = priceRecord.volume;
+
+        this.updatePriceIndicator(priceRecord);
+
+        return this;
+    }
+
+    /**
+     * Update the current market price.
+     * @param currentPrice Price to update the market price with.
+     */
+    public updateCurrentPrice(currentPrice: number) {
+        this.price = currentPrice;
     }
 
     /**
      * Update the price, lowPrice, highPrice, buyVolume, sellVolume, and volume, priceLabel, and pricePercentage information from the provided price.
      * @param price Price to update existing record for.
      */
-    public updatePrice(price: Price) {
+    private updatePriceIndicator(price: Price) {
         try {
             if (price !== undefined) {
-                price.updatePriceData(this.price, this.lowPrice, this.highPrice, this.buyVolume, this.sellVolume, this.volume);
-
-                this.lowPrice = price.lowPrice;
-                this.highPrice = price.highPrice;
-                this.buyVolume = price.buyVolume;
-                this.sellVolume = price.sellVolume;
-                this.volume = price.volume;
-
                 var avgPrice = this.highPrice + this.lowPrice;
                 var priceGap = (this.highPrice - this.lowPrice) / 5;
                 var lowPercentage = ((this.price / this.lowPrice) - 1) * 100;

@@ -3,7 +3,6 @@ import { ExchangeMarkets } from "src/markets/entities/exchange.markets.entity";
 import { Exchanges } from "src/enums/exchanges.enum";
 import { CoinbaseMarket } from "src/exchanges/entities/market.coinbase.entity";
 import { MarketsData } from "src/markets/markets.data";
-import { CurrencyData } from "src/currency/currency.data";
 
 const CoinbaseInterface = require('coinbase-pro-node');
 const coinbase = new CoinbaseInterface.default();
@@ -13,13 +12,11 @@ const coinbase = new CoinbaseInterface.default();
  */
 export class Coinbase {
     public name: Exchanges;
-    public currencyData: CurrencyData;
     public marketsData: MarketsData;
     private exchangeMarkets: ExchangeMarket[];
 
     constructor() {
         this.name = Exchanges.Coinbase;
-        this.currencyData = new CurrencyData();
         this.marketsData = new MarketsData();
         this.exchangeMarkets = [];
 
@@ -40,8 +37,6 @@ export class Coinbase {
                     this.exchangeMarkets.push(exchangeMarket);
                 });
             }
-
-            await this.currencyData.saveCurrencies(this.name, this.exchangeMarkets);
 
             return new ExchangeMarkets(this.name, this.exchangeMarkets);
         } catch (error) {
