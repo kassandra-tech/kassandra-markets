@@ -1,4 +1,5 @@
 
+import { Currency } from 'src/currency/entity/currency.entity';
 import { Price } from 'src/price/entities/price.entity';
 import { Exchanges } from '../../enums/exchanges.enum';
 import { Market } from './market.entity';
@@ -24,9 +25,15 @@ export class MarketsRecord {
      */
     exchangeMarkets: Markets[];
 
-    public constructor(exchange: Exchanges, market: Market) {
+    /**
+     * Currency information for the market.
+     */
+    currency: Currency;
+
+    public constructor(exchange: Exchanges, market: Market, currency: Currency = undefined) {
         this.exchanges = [];
         this.exchangeMarkets = [];
+        this.currency = currency;
 
         this.updateMarkets(exchange, market);
     }
@@ -35,7 +42,7 @@ export class MarketsRecord {
      * Update the markets data.
      * @param market Markets data to update.
      */
-    public updateMarkets(exchange: Exchanges, market: Market) {
+    public updateMarkets(exchange: Exchanges, market: Market, currency: Currency = undefined) {
         try {
             if (market !== null && market !== undefined) {
                 this.updateExchange(exchange);
@@ -61,6 +68,10 @@ export class MarketsRecord {
                 } else {
                     this.market = new Market(price);
                 }
+            }
+
+            if (currency !== undefined) {
+                this.currency = currency;
             }
         } catch (error) {
             console.log(error);

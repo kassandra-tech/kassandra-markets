@@ -5,7 +5,6 @@ import { Market } from './entities/market.entity';
 import { Prices } from 'src/price/entities/prices.entity';
 import { CurrencyData } from 'src/currency/currency.data';
 import { MarketsRecord } from './entities/markets.record.entity';
-import { Markets } from './entities/markets.entity';
 
 /**
  * Interact with the Kassandra datastore to retrieve and store market data.
@@ -27,25 +26,31 @@ export class MarketsData extends CurrencyData {
       var records = await this.getKassandraObjects(this.Definitions.MarketsString, 30);
 
       if (records !== undefined) {
-        records.forEach(record => { // Database row
+        for (const record of records) { // Database row
           var exchange = record.get(this.Definitions.exchangeString)
           var markets: Market[] = record.get(this.Definitions.marketsString);
 
           if (exchangeList.includes(exchange)) {
             if (markets !== undefined) {
-              markets.forEach(market => {
+              if (this.currencies.length === 0) {
+                await this.updateCurrencies(exchange, markets);
+              }
+
+              markets.forEach(async market => {
 
                 var record = marketsRecord.find(record => record.market.market === market.market);
 
                 if (record !== undefined) {
-                  record.updateMarkets(exchange, market);
+                  var currency = await this.getCurrency(this.getCurrencyFromMarket(market.market));
+
+                  record.updateMarkets(exchange, market, currency);
                 } else {
-                  marketsRecord.push(new MarketsRecord(exchange, market));
+                  marketsRecord.push(new MarketsRecord(exchange, market, currency));
                 }
               })
             }
           }
-        })
+        }
       }
 
       return marketsRecord;

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { KassandraData } from 'src/data/KassandraData';
 import { Exchanges } from 'src/enums/exchanges.enum';
-import { ExchangeMarket } from 'src/markets/entities/exchange.market.entity';
+import { Market } from 'src/markets/entities/market.entity';
 import { Currency } from './entity/currency.entity';
 
 var currencyInfo: Currency[] = [];
@@ -13,14 +13,14 @@ var symbols: string[] = [];
 @Injectable()
 export class CurrencyData extends KassandraData {
     public currencies: Currency[] = [];
-    private exchangeMarkets: ExchangeMarket[] = [];
+    private exchangeMarkets: Market[] = [];
 
     /**
      * Save currencies to the datastore if there is an update to the currencies.
      * @param exchange Exchange to save currencies for.
      * @param markets Markets to update currencies from.
      */
-    public async saveCurrencies(exchange: Exchanges, markets: ExchangeMarket[]) {
+    public async updateCurrencies(exchange: Exchanges, markets: Market[]) {
         try {
             var isUpdated: boolean = false;
 
@@ -54,10 +54,6 @@ export class CurrencyData extends KassandraData {
                         this.currencies.push(currency);
                     }
                 })
-
-                if (this.currencies.length > 0 && isUpdated) {
-                    await this.saveKassandraData(this.Definitions.CurrenciesString, this.Definitions.currenciesString, this.currencies);
-                }
             }
         } catch (error) {
             console.log(error);
@@ -94,12 +90,27 @@ export class CurrencyData extends KassandraData {
     }
 
     /**
+     * Get the currency information by the currency symbol.
+     * @param symbol Currency symbol.
+     * @returns Currency information about the requested symbol.
+     */
+    public async getCurrency(symbol: string): Promise<Currency> {
+        var currency: Currency = undefined;
+
+        if (currencyInfo.length > 0) {
+            currency = currencyInfo.find(currency => currency.symbol === symbol);
+        }
+
+        return currency;
+    }
+
+    /**
      * Initialize the currency for the requested exchange.
      * @param exchange Exchange to initialize.
      * @param markets Markets for the requested exchange.
      * @returns True, when all information needed to use currencies has been found.
      */
-    private async initialize(exchange: Exchanges, markets: ExchangeMarket[]) {
+    public async initialize(exchange: Exchanges, markets: Market[]) {
         try {
             currencyInfo = await this.getKassandraData(this.Definitions.CurrencyInformationString, this.Definitions.currenciesString);
 
@@ -111,12 +122,12 @@ export class CurrencyData extends KassandraData {
 
             if (markets !== undefined) {
                 markets.forEach(market => {
-                    if (!symbols.includes(market.currency)) {
-                        symbols.push(market.currency);
+                    if (!symbols.includes(this.getCurrencyFromMarket(market.market))) {
+                        symbols.push(this.getCurrencyFromMarket(market.market));
                     }
 
-                    if (!symbols.includes(market.quoteCurrency)) {
-                        symbols.push(market.quoteCurrency);
+                    if (!symbols.includes(this.getCurrencyFromMarket(market.market, false))) {
+                        symbols.push(this.getCurrencyFromMarket(market.market, false));
                     }
                 })
             }
