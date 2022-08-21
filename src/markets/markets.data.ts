@@ -5,6 +5,7 @@ import { Market } from './entities/market.entity';
 import { Prices } from 'src/price/entities/prices.entity';
 import { CurrencyData } from 'src/currency/currency.data';
 import { MarketsRecord } from './entities/markets.record.entity';
+import { MarketsFilter } from 'src/enums/markets.filter.enum';
 
 /**
  * Interact with the Kassandra datastore to retrieve and store market data.
@@ -16,7 +17,7 @@ export class MarketsData extends CurrencyData {
    * @param exchanges Exchange(s) to return markets of.
    * @returns Markets records for the requested exchange(s).
    */
-  public async getMarketRecords(exchanges: Exchanges[]): Promise<MarketsRecord[]> {
+  public async getMarketRecords(exchanges: Exchanges[], marketFilters: MarketsFilter = MarketsFilter.All): Promise<MarketsRecord[]> {
     var marketsRecord: MarketsRecord[] = [];
     var exchangeList: Exchanges[] = [];
 
@@ -37,15 +38,16 @@ export class MarketsData extends CurrencyData {
               }
 
               markets.forEach(async market => {
+                if (marketFilters === MarketsFilter.All || this.getCurrencyFromMarket(market.market, false) === marketFilters) {
+                  var record = marketsRecord.find(record => record.market.market === market.market);
 
-                var record = marketsRecord.find(record => record.market.market === market.market);
+                  if (record !== undefined) {
+                    var currency = await this.getCurrency(this.getCurrencyFromMarket(market.market));
 
-                if (record !== undefined) {
-                  var currency = await this.getCurrency(this.getCurrencyFromMarket(market.market));
-
-                  record.updateMarkets(exchange, market, currency);
-                } else {
-                  marketsRecord.push(new MarketsRecord(exchange, market, currency));
+                    record.updateMarkets(exchange, market, currency);
+                  } else {
+                    marketsRecord.push(new MarketsRecord(exchange, market, currency));
+                  }
                 }
               })
             }

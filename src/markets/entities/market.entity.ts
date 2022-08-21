@@ -11,13 +11,53 @@ export class Market {
      * @example BTC-USD
      */
     public market: string = "";
+
+    /**
+     * Price indicator based on the current price in the given time range.
+     * @example 10.0
+     */
     public pricePercentage: number = 0;
+
+    /**
+     * Price indicator recommendation on Buy, Sell, and Hold based on the current price in the given time range.
+     * @example Sell
+     */
     public priceLabel: string = "Hold";
+
+    /**
+     * Current market price.
+     * @example 10000.00000000
+     */
     public price: number = 0;
+
+    /**
+     * Lowest price in the given time range.
+     * @example 9000.00000000
+     */
     public lowPrice: number = 0;
+
+    /**
+     * Highest price in the given time range.
+     * @example 11000.00000000
+     */
     public highPrice: number = 0;
+
+    /**
+     * Amount of currency bought in the given time range.
+     * @example 2.43560000
+     */
     public buyVolume: number = 0;
+
+    /**
+     * Amount of currency sold in the given time range.
+     * @example 1.21500000
+     */
     public sellVolume: number = 0;
+
+    /**
+     * Total amount bought and sold in the given time range.
+     * @example 3.65060000
+     */
     public volume: number = 0;
 
     constructor(price: Price) {

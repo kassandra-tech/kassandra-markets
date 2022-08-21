@@ -8,6 +8,7 @@ import { Exchanges } from '../enums/exchanges.enum';
 import { MarketsService } from './markets.service';
 import { MarketsRecord } from './entities/markets.record.entity';
 import { ExchangeMarkets } from './entities/exchange.markets.entity';
+import { MarketsFilter } from 'src/enums/markets.filter.enum';
 
 /**
  * Provides market API routes.
@@ -15,14 +16,17 @@ import { ExchangeMarkets } from './entities/exchange.markets.entity';
 @ApiTags('markets')
 @Controller('markets')
 export class MarketsController {
-  constructor(private readonly marketsService: MarketsService) { }
+  constructor(private readonly marketsService: MarketsService) {
+
+  }
 
   /**
-   * Get supported exchange markets for the requested exchange(s).
+   * Get supported markets for the requested exchange(s).
    * @param exchanges Exchange(s) to return markets of.
-   * @returns Exchange markets for the requested exchange(s).
+   * @param marketsFilter Get a subset of markets based on the filtered market provided.
+   * @returns Markets for the requested exchange(s).
    */
-  @Get('exchange-markets')
+  @Get()
   @ApiQuery({
     name: 'exchanges',
     description: "Exchange(s) to return information from.",
@@ -30,27 +34,10 @@ export class MarketsController {
     isArray: true,
     required: true
   })
-  @ApiResponse({
-    status: 200,
-    description: 'ExchangeMarket(s) with supported markets per exchange.',
-    type: ExchangeMarkets,
-    isArray: true
-  })
-  async getExchangeMarkets(@Query('exchanges') exchanges): Promise<ExchangeMarkets[]> {
-    return await this.marketsService.getExchangeMarkets(exchanges);
-  }
-
-  /**
-   * Get supported markets for the requested exchange(s).
-   * @param exchanges Exchange(s) to return markets of.
-   * @returns Markets for the requested exchange(s).
-   */
-  @Get('markets')
   @ApiQuery({
-    name: 'exchanges',
+    name: 'marketsFilter',
     description: "Exchange(s) to return information from.",
-    enum: Exchanges,
-    isArray: true,
+    enum: MarketsFilter,
     required: true
   })
   @ApiResponse({
@@ -59,7 +46,7 @@ export class MarketsController {
     type: MarketsRecord,
     isArray: true
   })
-  async getMarkets(@Query('exchanges') exchanges): Promise<MarketsRecord[]> {
-    return await this.marketsService.getMarketRecords(exchanges);
+  async getMarkets(@Query('exchanges') exchanges, @Query('marketsFilter') marketsFilter): Promise<MarketsRecord[]> {
+    return await this.marketsService.getMarketRecords(exchanges, marketsFilter);
   }
 }
