@@ -22,17 +22,14 @@ export class Binance {
     public name: Exchanges;
     public marketsData: MarketsData;
     public priceData: PriceData;
-    private exchangeMarkets: ExchangeMarket[];
-    private currentPrices: CurrentPrice[];
-    private prices: Price[];
+    private exchangeMarkets: ExchangeMarket[] = [];
+    private currentPrices: CurrentPrice[] = [];
+    private prices: Price[] = [];
 
     constructor() {
         this.name = Exchanges.Binance;
         this.marketsData = new MarketsData();
         this.priceData = new PriceData();
-        this.exchangeMarkets = [];
-        this.currentPrices = [];
-        this.prices = [];
 
         this.update();
     }
