@@ -4,8 +4,8 @@ import { AppModule } from './app.module';
 
 const Moralis = require("moralis/node");
 
-const serverUrl = "https://cvbj5cxabl9b.usemoralis.com:2053/server";
-const appId = "uSdt1HA3QzXHUxuUX4v9RnrOWfhmK6RFjkbgEXnT";
+const serverUrl = "https://fbjp6fpn9cfk.usemoralis.com:2053/server";
+const appId = "2eSJJLFJUsHxYjS0FyMA8YOYyqX44DOKinZkvf8E";
 
 Moralis.start({ serverUrl, appId });
 
