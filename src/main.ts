@@ -13,7 +13,7 @@ Moralis.start({ serverUrl, appId });
  * Setup the app and start the server.
  */
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   const options = new DocumentBuilder()
     .setTitle('Exchange market information')
     .setDescription('Get information from 3rd party cryptocurrency exchanges')
