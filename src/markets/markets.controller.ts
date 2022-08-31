@@ -49,4 +49,27 @@ export class MarketsController {
   async getMarkets(@Query('exchanges') exchanges, @Query('marketsFilter') marketsFilter): Promise<MarketsRecord[]> {
     return await this.marketsService.getMarketRecords(exchanges, marketsFilter);
   }
+
+  /**
+   * Get supported market symbols for the requested exchange(s).
+   * @param exchanges Exchange(s) to return information from.
+   * @returns Market symbols for the requested exchange(s).
+   */
+  @Get('/symbols')
+  @ApiQuery({
+    name: 'exchanges',
+    description: "Exchange(s) to return information from.",
+    enum: Exchanges,
+    isArray: true,
+    required: true
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Market symbols for the requested exchange(s).',
+    type: String,
+    isArray: true
+  })
+  async getMarketSymbols(@Query('exchanges') exchanges): Promise<string[]> {
+    return this.marketsService.getMarketSymbols(exchanges);
+  }
 }

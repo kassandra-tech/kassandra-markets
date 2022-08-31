@@ -35,6 +35,14 @@ export class Binance {
     }
 
     /**
+     * Get supported market symbols.
+     * @returns Market symbols for the exchange.
+     */
+    public getMarketSymbols(): string[] {
+        return this.exchangeMarkets.map(market => market.market);
+    }
+
+    /**
      * Get supported markets from Biance.
      * @returns ExchangeMarkets record with supported Binance markets.
      */

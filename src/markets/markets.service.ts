@@ -12,8 +12,8 @@ import { MarketsFilter } from 'src/enums/markets.filter.enum';
  */
 @Injectable()
 export class MarketsService extends KassandraData {
-  private binance = new Binance();
-  private coinbase = new Coinbase();
+  public static binance = new Binance();
+  public static coinbase = new Coinbase();
   private marketData: MarketsData = new MarketsData();
 
   /**
@@ -23,5 +23,34 @@ export class MarketsService extends KassandraData {
    */
   public async getMarketRecords(exchanges: Exchanges[], marketsFilter: MarketsFilter): Promise<MarketsRecord[]> {
     return await this.marketData.getMarketRecords(exchanges, marketsFilter);
+  }
+
+  /**
+   * Get all market symbols for the requested market(s).
+   * @param exchanges Exchange(s) to return markets of.
+   * @returns All market symbols for the requested exchange(s).
+   */
+  public getMarketSymbols(exchanges: Exchanges[]): string[] {
+    try {
+      var exchangeIds: string[] = [];
+      exchanges = this.getExchanges(exchanges);
+
+      exchanges.forEach(exchange => {
+        switch (exchange) {
+          case Exchanges.Binance: {
+            exchangeIds = exchangeIds.concat(MarketsService.binance.getMarketSymbols().filter(market => exchangeIds.indexOf(market) < 0));
+            break;
+          }
+          case Exchanges.Coinbase: {
+            exchangeIds = exchangeIds.concat(MarketsService.coinbase.getMarketSymbols().filter(market => exchangeIds.indexOf(market) < 0));
+            break;
+          }
+        }
+      })
+
+      return exchangeIds;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
