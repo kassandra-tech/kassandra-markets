@@ -11,6 +11,7 @@ import { Price } from "src/price/entities/price.entity";
 import { Trade } from "src/price/entities/trade.entity";
 import { DataDefinitions } from "src/data/DataDefinitions";
 import { Prices } from "src/price/entities/prices.entity";
+import { Currency } from "src/currency/entity/currency.entity";
 
 const coinbase = new CoinbasePro();
 var helpers: DataDefinitions = new DataDefinitions();
@@ -40,6 +41,16 @@ export class Coinbase {
      */
     public getMarketSymbols(): string[] {
         return this.exchangeMarkets.map(market => market.market);
+    }
+
+    /**
+     * Get ssupported currencies.
+     * @returns Currencies supported by the exchange.
+     */
+    public getCurrencies(): Currency[] {
+        this.updateCurrencies();
+
+        return this.marketsData.Currencies;
     }
 
     /**
@@ -134,15 +145,34 @@ export class Coinbase {
         coinbase.ws.connect();
     }
 
+    /**
+     * Update currency information for the exchange.
+     */
+    public async updateCurrencies() {
+        try {
+            if (this.marketsData.Currencies.length === 0) {
+            var exchangeMarket = await this.getMarkets();
+
+            if (exchangeMarket !== undefined) {
+                await this.marketsData.updateCurrencies(exchangeMarket.markets.map(market => market.market));
+            }
+        }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     private async getMarketsFormat() {
         var exchangeFormatMarkets: string[] = [];
 
         try {
-            var exchangeMarket = await this.getMarkets();
+            await this.updateCurrencies();
 
-            if (exchangeMarket !== undefined) {
-                exchangeMarket.markets.forEach((market) => {
-                    exchangeFormatMarkets.push(market.market);
+            if (this.exchangeMarkets !== undefined) {
+                await this.marketsData.updateCurrencies(this.exchangeMarkets.map(market => market.market));
+
+                this.exchangeMarkets.forEach((market) => {
+                    exchangeFormatMarkets.push(market.format);
                 })
             }
         } catch (error) {

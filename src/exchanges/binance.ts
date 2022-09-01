@@ -8,6 +8,7 @@ import { CurrentPrice } from "src/price/entities/current.price.entity";
 import { Price } from "src/price/entities/price.entity";
 import { Prices } from "src/price/entities/prices.entity";
 import { TimeHelpers } from "src/data/TimeHelpers";
+import { Currency } from "src/currency/entity/currency.entity";
 
 const BinanceInterface = require('binance-api-node');
 const binance = BinanceInterface.default({
@@ -43,6 +44,16 @@ export class Binance {
     }
 
     /**
+     * Get ssupported currencies.
+     * @returns Currencies supported by the exchange.
+     */
+    public getCurrencies(): Currency[] {
+        this.updateCurrencies();
+
+        return this.marketsData.Currencies;
+    }
+
+    /**
      * Get supported markets from Biance.
      * @returns ExchangeMarkets record with supported Binance markets.
      */
@@ -53,8 +64,12 @@ export class Binance {
             var markets: BinanceMarket[] = exchangeInfo.symbols;
             if (markets !== undefined) {
                 markets.forEach(market => {
+                    
                     var exchangeMarket = new ExchangeMarket(market.symbol, market.baseAsset, market.quoteAsset);
-                    this.exchangeMarkets.push(exchangeMarket);
+
+                    if (!this.exchangeMarkets.includes(exchangeMarket)) {
+                        this.exchangeMarkets.push(exchangeMarket);
+                    }
                 })
             }
 
@@ -118,14 +133,33 @@ export class Binance {
         })
     }
 
+    /**
+     * Update currency information for the exchange.
+     */
+    public async updateCurrencies() {
+        try {
+            if (this.marketsData.Currencies.length === 0) {
+            var exchangeMarket = await this.getMarkets();
+
+            if (exchangeMarket !== undefined) {
+                await this.marketsData.updateCurrencies(exchangeMarket.markets.map(market => market.market));
+            }
+        }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     private async getMarketsFormat() {
         var exchangeFormatMarkets: string[] = [];
 
         try {
-            var exchangeMarket = await this.getMarkets();
+            await this.updateCurrencies();
 
-            if (exchangeMarket !== undefined) {
-                exchangeMarket.markets.forEach((market) => {
+            if (this.exchangeMarkets !== undefined) {
+                await this.marketsData.updateCurrencies(this.exchangeMarkets.map(market => market.market));
+
+                this.exchangeMarkets.forEach((market) => {
                     exchangeFormatMarkets.push(market.format);
                 })
             }

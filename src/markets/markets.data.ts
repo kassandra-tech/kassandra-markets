@@ -33,8 +33,8 @@ export class MarketsData extends CurrencyData {
 
           if (exchangeList.includes(exchange)) {
             if (markets !== undefined) {
-              if (this.currencies.length === 0) {
-                await this.updateCurrencies(exchange, markets);
+              if (this.Currencies.length === 0) {
+                await this.updateCurrencies(markets.map(market => market.market));
               }
 
               markets.forEach(async market => {
@@ -42,7 +42,7 @@ export class MarketsData extends CurrencyData {
                   var record = marketsRecord.find(record => record.market.market === market.market);
 
                   if (record !== undefined) {
-                    var currency = await this.getCurrency(this.getCurrencyFromMarket(market.market));
+                    var currency = this.Currencies.find(currency => currency.symbol === this.getCurrencyFromMarket(market.market));
 
                     record.updateMarkets(exchange, market, currency);
                   } else {
