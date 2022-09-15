@@ -172,7 +172,7 @@ export class Coinbase {
                 await this.marketsData.updateCurrencies(this.exchangeMarkets.map(market => market.market));
 
                 this.exchangeMarkets.forEach((market) => {
-                    exchangeFormatMarkets.push(market.format);
+                    exchangeFormatMarkets.push(market.market);
                 })
             }
         } catch (error) {
