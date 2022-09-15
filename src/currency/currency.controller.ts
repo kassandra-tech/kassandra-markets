@@ -6,7 +6,7 @@ import {
 } from '@nestjs/swagger';
 import { Exchanges } from 'src/enums/exchanges.enum';
 import { CurrencyService } from './currency.service';
-import { Currency } from './entity/currency.entity';
+import { Currencies } from './entity/currency.entity';
 
 /**
  * Provides currency API routes.
@@ -34,10 +34,10 @@ export class CurrencyController {
     @ApiResponse({
         status: 200,
         description: 'Market(s) with supported markets per exchange.',
-        type: Currency,
+        type: Currencies,
         isArray: true
     })
-    async getAvailableCurrencies(@Query('exchanges') exchanges): Promise<Currency[]> {
+    async getAvailableCurrencies(@Query('exchanges') exchanges): Promise<Currencies[]> {
         return this.currencyService.getCurrencies(exchanges);
     }
 }

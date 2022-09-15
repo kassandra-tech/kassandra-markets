@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Base } from 'src/data/Base';
 import { Exchanges } from 'src/enums/exchanges.enum';
 import { MarketsService } from 'src/markets/markets.service';
-import { CurrencyData } from './currency.data';
-import { Currency } from './entity/currency.entity';
+import { Currencies, Currency } from './entity/currency.entity';
 
 /**
  * Supported market requests.
@@ -16,7 +15,7 @@ export class CurrencyService extends Base {
    * @param exchanges Exchange(s) to return markets of.
    * @returns Currencies for the requested exchange(s).
    */
-  public getCurrencies(exchanges: Exchanges[]): Currency[] {
+  public getCurrencies(exchanges: Exchanges[]): Currencies[] {
     try {
       var currencies: Currency[] = [];
       exchanges = this.getExchanges(exchanges);
@@ -36,13 +35,14 @@ export class CurrencyService extends Base {
         }
       })
 
-      const uniqueSymbols = [];
+      const uniqueSymbols: Currencies[] = [];
+      
 
       const unique = currencies.filter(currency => {
-        const isDupe = uniqueSymbols.includes(currency.symbol);
+        const isDupe = uniqueSymbols[currency.symbol];
 
-        if (!isDupe) {
-          uniqueSymbols.push(currency.symbol);
+        if (isDupe === undefined) {
+          uniqueSymbols.push({ [currency.symbol]: {name: currency.name, rank: currency.rank, rating: currency.rating }});
 
           return true;
         }
@@ -50,7 +50,7 @@ export class CurrencyService extends Base {
         return false;
       })
 
-      return unique;
+      return uniqueSymbols;
     } catch (error) {
       console.log(error);
     }

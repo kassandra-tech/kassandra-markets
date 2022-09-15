@@ -42,11 +42,9 @@ export class MarketsData extends CurrencyData {
                   var record = marketsRecord.find(record => record.market.market === market.market);
 
                   if (record !== undefined) {
-                    var currency = this.Currencies.find(currency => currency.symbol === this.getCurrencyFromMarket(market.market));
-
-                    record.updateMarkets(exchange, market, currency);
+                    record.updateMarkets(exchange, market);
                   } else {
-                    marketsRecord.push(new MarketsRecord(exchange, market, currency));
+                    marketsRecord.push(new MarketsRecord(exchange, market));
                   }
                 }
               })

@@ -30,11 +30,6 @@ export class Currency extends Base {
      */
     rating: string;
 
-    /**
-     * Exchanges the currency is supported on.
-     */
-    exchanges: Exchanges[];
-
     constructor(symbol: string, exchange: Exchanges) {
         super();
 
@@ -42,15 +37,6 @@ export class Currency extends Base {
         this.name = "";
         this.rank = 0;
         this.rating = ""
-        this.exchanges = [];
-
-        this.updateExchange(exchange);
-    }
-
-    public updateExchange(exchange: Exchanges) {
-        if (!this.exchanges.includes(exchange)) {
-            this.exchanges.push(exchange);
-        }
     }
 
     public updateInfo(name: string, rank: number, rating: string) {
@@ -58,16 +44,12 @@ export class Currency extends Base {
         this.rank = rank;
         this.rating = rating;
     }
+}
 
-    public includesExchanges(exchanges: Exchanges[]): boolean {
-        exchanges = this.getExchanges(exchanges);
-
-        exchanges.forEach(exchange => {
-            if (this.exchanges.includes(exchange)) {
-                return true;
-            }
-        })
-
-        return false;
+export class Currencies {
+    [symbol: string] : {
+        name: string,
+        rank: number;
+        rating: string
     }
 }

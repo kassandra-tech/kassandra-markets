@@ -25,15 +25,9 @@ export class MarketsRecord {
      */
     exchangeMarkets: Markets[];
 
-    /**
-     * Currency information for the market.
-     */
-    currency: Currency;
-
-    public constructor(exchange: Exchanges, market: Market, currency: Currency = undefined) {
+    public constructor(exchange: Exchanges, market: Market) {
         this.exchanges = [];
         this.exchangeMarkets = [];
-        this.currency = currency;
 
         this.updateMarkets(exchange, market);
     }
@@ -42,7 +36,7 @@ export class MarketsRecord {
      * Update the markets data.
      * @param market Markets data to update.
      */
-    public updateMarkets(exchange: Exchanges, market: Market, currency: Currency = undefined) {
+    public updateMarkets(exchange: Exchanges, market: Market) {
         try {
             if (market !== null && market !== undefined) {
                 this.updateExchange(exchange);
@@ -68,10 +62,6 @@ export class MarketsRecord {
                 } else {
                     this.market = new Market(price);
                 }
-            }
-
-            if (currency !== undefined) {
-                this.currency = currency;
             }
         } catch (error) {
             console.log(error);
