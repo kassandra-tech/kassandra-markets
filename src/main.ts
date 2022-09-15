@@ -17,7 +17,7 @@ async function bootstrap() {
   const options = new DocumentBuilder()
     .setTitle('Exchange market information')
     .setDescription('Get information from 3rd party cryptocurrency exchanges')
-    .setVersion('0.1.2')
+    .setVersion('0.1.3')
     .addTag('markets')
     .build();
   const document = SwaggerModule.createDocument(app, options);
