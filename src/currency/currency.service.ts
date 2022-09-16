@@ -15,7 +15,7 @@ export class CurrencyService extends Base {
    * @param exchanges Exchange(s) to return markets of.
    * @returns Currencies for the requested exchange(s).
    */
-  public getCurrencies(exchanges: Exchanges[]): Currencies[] {
+  public getCurrencies(exchanges: Exchanges[]): {} {
     try {
       var currencies: Currency[] = [];
       exchanges = this.getExchanges(exchanges);
@@ -35,14 +35,14 @@ export class CurrencyService extends Base {
         }
       })
 
-      const uniqueSymbols: Currencies[] = [];
+      const uniqueSymbols: {} = {};
       
 
       const unique = currencies.filter(currency => {
         const isDupe = uniqueSymbols[currency.symbol];
 
         if (isDupe === undefined) {
-          uniqueSymbols.push({ [currency.symbol]: {name: currency.name, rank: currency.rank, rating: currency.rating }});
+          uniqueSymbols[currency.symbol] = { name: currency.name, rank: currency.rank, rating: currency.rating };
 
           return true;
         }

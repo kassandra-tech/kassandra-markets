@@ -37,7 +37,7 @@ export class CurrencyController {
         type: Currencies,
         isArray: true
     })
-    async getAvailableCurrencies(@Query('exchanges') exchanges): Promise<Currencies[]> {
+    async getAvailableCurrencies(@Query('exchanges') exchanges): Promise<{}> {
         return this.currencyService.getCurrencies(exchanges);
     }
 }
