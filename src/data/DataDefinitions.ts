@@ -1,37 +1,87 @@
 /**
- * Kassandra definitions for accessing data from the Kassandra datastore.
+ * Definitions for accessing data from the Kassandra datastore.
  */
 export class DataDefinitions {
-    CurrenciesString: string;
-    currenciesString: string;
-    CurrencyInformationString: string;
-    ExchangeMarketString: string;
-    MarketsString: string;
-    marketsString: string;
-    marketRecordString: string;
-    PriceString: string;
-    PricesString: string;
-    pricesString: string;
-    createdAtString: string;
-    exchangeString: string;
-    updatedAtString: string;
+    /**
+     * Kassandra objects
+     */
 
-    constructor() {
-        this.CurrenciesString = "Currencies";
-        this.currenciesString = "currencies";
-        this.CurrencyInformationString = "CurrencyInformation";
+    /**
+     * CurrencyInformation
+     */
+    public CurrencyInformationString: string = "CurrencyInformation";
 
-        this.ExchangeMarketString = "ExchangeMarket";
-        this.MarketsString = "Markets";
-        this.marketsString = "markets";
-        this.marketRecordString = "MarketRecord";
+    /**
+     * Currencies
+     */
+    public CurrenciesString: string = "Currencies";
 
-        this.PriceString = "Price";
-        this.PricesString = "Prices";
-        this.pricesString = "prices";
+    /**
+     * Markets
+     */
+    public MarketsString: string= "Markets";
 
-        this.createdAtString = "createdAt";
-        this.exchangeString = "exchange";
-        this.updatedAtString = "updatedAt";
+    /**
+     * Price
+     */
+    public PriceString: string= "Price";
+
+    /**
+     * Prices
+     */
+    public PricesString: string = "Prices";
+
+    /**
+     * Kassandra object properties
+     */
+
+    /**
+     * exchange
+     */
+    public exchangeString: string = "exchange";
+
+    /**
+     * currencies
+     */
+    public currenciesString: string = "currencies";
+
+    /**
+     * markets
+     */
+    public marketsString: string = "markets";
+
+    /**
+     * prices
+     */
+    public pricesString: string = "prices";
+
+    /**
+     * Moralis properties
+     */
+
+    /**
+     * createdAt
+     */
+    public createdAtString: string = "createdAt";
+
+    /**
+     * updatedAt
+     */
+    public updatedAtString: string = "updatedAt";
+
+    /**
+     * Format numbers with 8 decimal places.
+     * @param amount number to format.
+     * @returns formatted number with 8 decimal places.
+     */
+    public cryptoNumberFormat(amount: number): number {
+        try {
+            if (amount === null || amount === undefined) {
+                amount = 0;
+            }
+            return parseFloat(parseFloat(amount.toString()).toFixed(8));
+        } catch (error) {
+            console.log(error);
+        }
     }
 }

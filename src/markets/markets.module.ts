@@ -10,4 +10,4 @@ import { MarketsService } from './markets.service';
 /**
  * Market routing and service details to request market information.
  */
-export class MarketsModule {}
+export class MarketsModule { }

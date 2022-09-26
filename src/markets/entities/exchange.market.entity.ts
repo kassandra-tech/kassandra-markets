@@ -2,13 +2,6 @@
  * Common market format so all exchanges can be easily accessed by Kassandra.
  */
 export class ExchangeMarket {
-  constructor(format: string, currency: string, quoteCurrency: string) {
-    this.market = currency + '-' + quoteCurrency;
-    this.format = format;
-    this.currency = currency;
-    this.quoteCurrency = quoteCurrency;
-  }
-
   /**
    * Kassandra market format.
    * @example BTC-USD
@@ -32,4 +25,11 @@ export class ExchangeMarket {
    * @example USD
    */
   quoteCurrency: string;
+
+  constructor(format: string, currency: string, quoteCurrency: string) {
+    this.market = currency + '-' + quoteCurrency;
+    this.format = format;
+    this.currency = currency;
+    this.quoteCurrency = quoteCurrency;
+  }
 }

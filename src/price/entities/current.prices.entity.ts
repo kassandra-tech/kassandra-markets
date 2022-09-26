@@ -1,10 +1,10 @@
-import { Exchanges } from '../../enums/exchanges.enum';
-import { ExchangeMarket } from './exchange.market.entity';
+import { Exchanges } from "src/enums/exchanges.enum";
+import { CurrentPrice } from "./current.price.entity";
 
 /**
  * Record that contains the name of the exchange with associated exchange markets.
  */
-export class ExchangeMarkets {
+export class CurrentPrices {
     /**
      * Exchange hosting the market.
      * @example Binance
@@ -14,10 +14,10 @@ export class ExchangeMarkets {
     /**
      * Markets supported by the exchange.
      */
-    markets: ExchangeMarket[];
+    prices: CurrentPrice[];
 
-    public constructor(exchange: Exchanges, markets: ExchangeMarket[]) {
+    public constructor(exchange: Exchanges, prices: CurrentPrice[]) {
         this.exchange = exchange;
-        this.markets = markets;
+        this.prices = prices;
     }
 }

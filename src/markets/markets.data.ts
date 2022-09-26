@@ -1,101 +1,92 @@
 import { Injectable } from '@nestjs/common';
-import { Binance } from '../exchanges/binance';
-import { Coinbase } from '../exchanges/coinbase';
-import { DataDefinitions } from '../data/DataDefinitions';
-import { ExchangeMarkets } from './entities/exchange.markets.entity';
-import { Exchanges } from './enums/exchanges.enum';
-
-const Moralis = require("moralis/node");
-const Definitions = new DataDefinitions();
+import { Exchanges } from '../enums/exchanges.enum';
+import { ExchangeMarket } from './entities/exchange.market.entity';
+import { Market } from './entities/market.entity';
+import { Prices } from 'src/price/entities/prices.entity';
+import { CurrencyData } from 'src/currency/currency.data';
+import { MarketsRecord } from './entities/markets.record.entity';
+import { MarketsFilter } from 'src/enums/markets.filter.enum';
 
 /**
  * Interact with the Kassandra datastore to retrieve and store market data.
  */
 @Injectable()
-export class MarketsData {
-  private binance = new Binance();
-  private coinbase = new Coinbase();
-
+export class MarketsData extends CurrencyData {
   /**
-   * Get supported markets for the requested exchange(s),
+   * Get market records for the given exchanges.
    * @param exchanges Exchange(s) to return markets of.
-   * @returns Exchange markets for the requested exchange(s).
+   * @returns Markets records for the requested exchange(s).
    */
-  public async getExchangeMarket(exchanges: Exchanges[]): Promise<ExchangeMarkets[]> {
-
-    var list: ExchangeMarkets[] = [];
+  public async getMarketRecords(exchanges: Exchanges[], marketFilters: MarketsFilter = MarketsFilter.All): Promise<MarketsRecord[]> {
+    var marketsRecord: MarketsRecord[] = [];
     var exchangeList: Exchanges[] = [];
 
     try {
-      if (exchanges.includes(Exchanges.All)) {
-        exchangeList = this.getAllExchanges();
-      } else if (Array.isArray(exchanges)) {
-        Array.from(exchanges).forEach(exchange => {
-          exchangeList.push(exchange);
-        })
-      } else {
-        exchangeList.push(exchanges);
-      }
+      exchangeList = this.getExchanges(exchanges);
 
-      var moralisObj = Moralis.Object.extend(Definitions.ExchangeMarketString);
-      var query = new Moralis.Query(moralisObj);
-      query.descending(Definitions.createdAtString);
+      var records = await this.getKassandraObjects(this.Definitions.MarketsString, 30);
 
-      // Check to see if the database already has an ExchangeMarket for the requested market(s).
-      for (const exchange of exchangeList) {
-        query.equalTo(Definitions.exchangeString, exchange);
+      if (records !== undefined) {
+        for (const record of records) { // Database row
+          var exchange = record.get(this.Definitions.exchangeString)
+          var markets: Market[] = record.get(this.Definitions.marketsString);
 
-        var record = await query.first();
+          if (exchangeList.includes(exchange)) {
+            if (markets !== undefined) {
+              if (this.Currencies.length === 0) {
+                await this.updateCurrencies(markets.map(market => market.market));
+              }
 
-        if (record != undefined) {
-          var markets = record.get(Definitions.marketsString);
-          list.push(markets);
-        } else { // If 'ExchangeMarkets' are not found the will be saved to the database.
-          if (exchange === Exchanges.Binance) {
-            markets = await this.binance.getMarkets();
-            list.push(markets);
-            this.saveExchangeMarkets(exchange, markets);
-          } else if (exchange === Exchanges.Coinbase) {
-            markets = await this.coinbase.getMarkets();
-            list.push(markets);
-            this.saveExchangeMarkets(exchange, markets);
+              markets.forEach(async market => {
+                if (marketFilters === MarketsFilter.All || this.getCurrencyFromMarket(market.market, false) === marketFilters) {
+                  var record = marketsRecord.find(record => record.market.market === market.market);
+
+                  if (record !== undefined) {
+                    record.updateMarkets(exchange, market);
+                  } else {
+                    marketsRecord.push(new MarketsRecord(exchange, market));
+                  }
+                }
+              })
+            }
           }
         }
       }
 
-      return list;
+      return marketsRecord;
     } catch (error) {
       console.log(error);
     }
   }
 
   /**
-   * Save ExchangeMarkets record in the Kassandra datastore.
-   * @param exchange Exchange to save markets for.
-   * @param markets ExchangeMarkets record with all supported exchanges.
+   * Save a market record.
+   * @param exchange Exchange to store the market record for.
+   * @param exchangeMarkets Markets for the exchange.
+   * @param currentPrices  Current exchange market prices.
+   * @param prices Exchange historical prices.
    */
-  private async saveExchangeMarkets(exchange: Exchanges, markets: ExchangeMarkets) {
+  public async saveMarkets(exchange: Exchanges, exchangeMarkets: ExchangeMarket[], prices: Prices) {
     try {
-      var moralisObj = Moralis.Object.extend(Definitions.ExchangeMarketString);
-      var marketObj = new moralisObj();
-      marketObj.set(Definitions.exchangeString, exchange);
-      marketObj.set(Definitions.marketsString, markets);
+      var markets: Market[] = [];
 
-      await marketObj.save();
+      exchangeMarkets.forEach(market => {
+        var symbol = market.market;
+
+        var price = prices.prices.find(price => price.market === symbol);
+
+        var newMarket = new Market(price);
+
+        if (price !== undefined) {
+          markets.push(newMarket);
+        }
+      })
+
+      if (markets.length > 0) {
+        await this.saveKassandraData(this.Definitions.MarketsString, this.Definitions.marketsString, markets, exchange);
+      }
     } catch (error) {
       console.log(error);
     }
-  }
-
-  /**
-   * 
-   * @returns Create array of all supported exchanges in the Exchanges enum.
-   */
-  private getAllExchanges(): Exchanges[] {
-    var exchanges: Exchanges[] = [];
-
-    exchanges.push(Exchanges.Binance, Exchanges.Coinbase);
-
-    return exchanges;
   }
 }
